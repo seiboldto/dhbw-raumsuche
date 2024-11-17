@@ -11,15 +11,14 @@ import java.util.zip.GZIPInputStream
 class ServerConnector {
 
     companion object {
-        suspend fun downloadAndExtractJson(): String? {
+        suspend fun downloadAndExtractRoomsData(): ApiResponse {
             val client = OkHttpClient()
+            val request = createRequest()
+            val json = fetchRoomsData(client, request)
+            return Json.decodeFromString<ApiResponse>(json)
+        }
 
-            val url = "http://192.248.187.245:80/api/dhbw-rooms"
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Accept", "application/dhbw")
-                .build()
-
+        private suspend fun fetchRoomsData(client: OkHttpClient, request: Request): String {
             try {
                 val response = withContext(IO) { client.newCall(request).execute() }
 
@@ -27,16 +26,23 @@ class ServerConnector {
                     throw Exception("Failed to download file: ${response.code}")
                 }
 
-                val gzipStream = withContext(IO) {
-                    GZIPInputStream(response.body.byteStream())
+                return withContext(IO) {
+                    GZIPInputStream(response.body.byteStream()).use { gzipStream ->
+                        val reader = InputStreamReader(gzipStream)
+                        reader.readText()
+                    }
                 }
-                val reader = InputStreamReader(gzipStream)
-                val json = Json.decodeFromString<ApiResponse>(reader.readText())
-                return json.toString()
             } catch (e: Exception) {
                 e.printStackTrace()
-                return null
+                return ""
             }
+        }
+
+        private fun createRequest(): Request {
+            return Request.Builder()
+                .url("http://192.248.187.245:80/api/dhbw-rooms")
+                .addHeader("Accept", "application/dhbw")
+                .build()
         }
     }
 
