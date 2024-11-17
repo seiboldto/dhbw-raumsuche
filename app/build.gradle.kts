@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -54,6 +55,9 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.okhttp)
+    implementation(libs.jetbrains.kotlinx.serialization.json.v163)
 
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     implementation(composeBom)

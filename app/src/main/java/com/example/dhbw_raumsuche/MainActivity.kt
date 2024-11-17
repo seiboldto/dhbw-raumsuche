@@ -11,7 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.dhbw_raumsuche.network.ServerConnector
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +31,12 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+            }
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            withContext(IO) {
+                println(ServerConnector.downloadAndExtractJson())
             }
         }
     }
