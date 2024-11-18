@@ -1,6 +1,7 @@
 package com.example.dhbw_raumsuche
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,7 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.dhbw_raumsuche.network.ServerConnector.Companion.downloadAndExtractRoomsData
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +33,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        getRoomsData()
     }
+
+    private fun getRoomsData() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val roomsData = downloadAndExtractRoomsData()
+                Log.d("MainActivity", "Data received: $roomsData")
+            }
+        }
+    }
+
 }
 
 @Composable
