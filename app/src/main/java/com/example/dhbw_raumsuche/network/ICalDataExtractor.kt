@@ -1,6 +1,7 @@
 package com.example.dhbw_raumsuche.network
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 
 class ICalDataExtractor {
@@ -13,12 +14,7 @@ class ICalDataExtractor {
 
     companion object {
         fun parseICalData(iCalData: List<String>): Map<String, List<Event>> {
-            val dateTimeFormatter = DateTimeFormatterBuilder()
-                .appendPattern("yyyyMMdd'T'HHmm")
-                .optionalStart()
-                .appendPattern("ss")
-                .optionalEnd()
-                .toFormatter()
+            val dateTimeFormatter = createDateTimeFormatter()
             val eventsByRoom = mutableMapOf<String, MutableList<Event>>()
 
             val eventPattern = Regex(
@@ -27,18 +23,31 @@ class ICalDataExtractor {
             )
 
             iCalData.forEach { data ->
-                    eventPattern.findAll(data).forEach { match ->
+                for (match in eventPattern.findAll(data)) {
+                        val room = match.groupValues[4]
+                        if (room.startsWith("E") || room.contains("MA") || room.contains("Online")) {
+                            continue
+                        }
+
                         val start = LocalDateTime.parse(match.groupValues[1], dateTimeFormatter)
                         val end = LocalDateTime.parse(match.groupValues[2], dateTimeFormatter)
                         val summary = match.groupValues[3].trim()
-                        val room = match.groupValues[4]
-
                         val event = Event(start, end, summary)
                         eventsByRoom.computeIfAbsent(room) { mutableListOf() }.add(event)
                     }
             }
             return eventsByRoom.mapValues { it.value.toList() }
         }
+
+        private fun createDateTimeFormatter(): DateTimeFormatter? {
+            return DateTimeFormatterBuilder()
+                .appendPattern("yyyyMMdd'T'HHmm")
+                .optionalStart()
+                .appendPattern("ss")
+                .optionalEnd()
+                .toFormatter()
+        }
+
     }
 
 }

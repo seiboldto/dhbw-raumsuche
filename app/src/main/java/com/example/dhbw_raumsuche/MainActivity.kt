@@ -41,17 +41,12 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val roomsData = downloadAndExtractRoomsData()
-                //Log.d("MainActivity", "Data received: $roomsData")
                 val eventsByRoom = parseICalData(roomsData.iCals)
-                eventsByRoom.forEach { (room, events) ->
-                    println("Raum: $room")
-                    events.forEach { println("  $it") }
+                Log.d("MainActivity", eventsByRoom.keys.toString())
                 }
             }
         }
     }
-
-}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
