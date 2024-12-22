@@ -2,7 +2,6 @@ package com.example.dhbw_raumsuche.network
 
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.InputStreamReader
@@ -11,14 +10,13 @@ import java.util.zip.GZIPInputStream
 class ServerConnector {
 
     companion object {
-        suspend fun downloadAndExtractRoomsData(): ApiResponse {
+        suspend fun downloadRoomData(): String {
             val client = OkHttpClient()
             val request = createRequest()
-            val json = fetchRoomsData(client, request)
-            return Json.decodeFromString<ApiResponse>(json)
+            return fetchRoomData(client, request)
         }
 
-        private suspend fun fetchRoomsData(client: OkHttpClient, request: Request): String {
+        private suspend fun fetchRoomData(client: OkHttpClient, request: Request): String {
             try {
                 val response = withContext(IO) { client.newCall(request).execute() }
 
