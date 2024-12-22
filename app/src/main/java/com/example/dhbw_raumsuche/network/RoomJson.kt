@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApiResponse(
+data class RoomJson(
     @SerialName("icals") val iCals: List<String>,
     @SerialName("updated_at") val updatedAt: String
 )
