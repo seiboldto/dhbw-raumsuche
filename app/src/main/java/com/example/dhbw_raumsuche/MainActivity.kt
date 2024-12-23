@@ -1,10 +1,13 @@
 package com.example.dhbw_raumsuche
 
+import android.Manifest
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -16,6 +19,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.dhbw_raumsuche.data.RoomDataProvider
+import com.example.dhbw_raumsuche.location.GPSToLocationService
+import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
+import com.example.dhbw_raumsuche.location.LocationViewModel
 import com.example.dhbw_raumsuche.network.ICalDataExtractor.Companion.parseICalData
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
 import kotlinx.coroutines.Dispatchers
@@ -23,8 +29,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+
+    private val locationViewModel = LocationViewModel()
+    private lateinit var gpsToLocationService: GPSToLocationService
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            locationViewModel.updateLocation(
+                gpsToLocationService, this
+            )
+        } else {
+            Toast.makeText(
+                this,
+                "This app requires permission to be granted in order to show the nearest building to your location!",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        gpsToLocationService = GPSToLocationService(this)
         enableEdgeToEdge()
         setContent {
             Dhbw_raumsucheTheme {
@@ -37,6 +64,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         getRoomData()
+        updateLocation()
     }
 
     private fun getRoomData() {
@@ -50,6 +78,17 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun updateLocation() {
+        if (!checkLocationPermission(this)) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            locationViewModel.updateLocation(
+                gpsToLocationService, this
+            )
+        }
+    }
+
 }
 
 @Composable
