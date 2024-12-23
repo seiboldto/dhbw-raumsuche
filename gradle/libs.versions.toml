@@ -1,10 +1,11 @@
 [versions]
 activityComposeVersion = "1.9.3"
-agp = "8.6.0"
-kotlin = "1.9.0"
+agp = "8.7.3"
 kotlinxSerializationJson = "1.6.3"
 lifecycleViewmodelCompose = "2.8.7"
 okhttp = "5.0.0-alpha.14"
+playServicesLocationVersion = "21.3.0"
+kotlinVersion = "2.1.0"
 
 [libraries]
 androidx-activity-compose-v192 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -16,8 +17,10 @@ ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocationVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.1.0" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }
 

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "1.9.22"
     id ("kotlin-kapt")
 }
@@ -11,6 +12,10 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     defaultConfig {
@@ -67,6 +72,7 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.jetbrains.kotlinx.serialization.json.v163)
+    implementation(libs.play.services.location)
 
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     implementation(composeBom)
@@ -81,7 +87,7 @@ dependencies {
     // implementation("androidx.compose.foundation:foundation")
     // or only import the main APIs for the underlying toolkit systems,
     // such as input and measurement/layout
-    // implementation("androidx.compose.ui:ui")
+    // implementation(libs.androidx.ui)
 
     // Android Studio Preview support
     implementation(libs.ui.tooling.preview)
