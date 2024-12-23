@@ -17,7 +17,7 @@ class RoomDataProvider {
             val file = File(context.filesDir, "room.json")
 
             val localData = readLocalRoomData(file)
-            if (localData != null && isLatestJson(localData.updatedAt.toLong())) {
+            if (localData != null && isLatestJson(localData.updatedAt.toLong() * 1000)) {
                 return localData
             }
 
@@ -30,7 +30,10 @@ class RoomDataProvider {
                     val jsonString = file.readText()
                     Json.decodeFromString(jsonString)
                 } catch (e: Exception) {
-                    Log.e("RoomDataProvider","Error while reading or parsing the local room json file: ${e.message}")
+                    Log.e(
+                        "RoomDataProvider",
+                        "Error while reading or parsing the local room json file: ${e.message}"
+                    )
                     null
                 }
             } else {
