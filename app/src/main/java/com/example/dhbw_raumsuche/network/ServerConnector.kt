@@ -38,7 +38,7 @@ class ServerConnector {
 
         private fun createRequest(): Request {
             return Request.Builder()
-                .url("http://192.248.187.245:80/api/dhbw-rooms")
+                .url("http://192.248.187.245/api/v1/dhbw-rooms")
                 .addHeader("Accept", "application/dhbw")
                 .build()
         }

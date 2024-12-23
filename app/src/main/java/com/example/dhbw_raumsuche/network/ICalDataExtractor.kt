@@ -24,17 +24,17 @@ class ICalDataExtractor {
 
             iCalData.forEach { data ->
                 for (match in eventPattern.findAll(data)) {
-                        val room = match.groupValues[4]
-                        if (room.startsWith("E") || room.contains("MA") || room.contains("Online")) {
-                            continue
-                        }
-
-                        val start = LocalDateTime.parse(match.groupValues[1], dateTimeFormatter)
-                        val end = LocalDateTime.parse(match.groupValues[2], dateTimeFormatter)
-                        val summary = match.groupValues[3].trim()
-                        val event = Event(start, end, summary)
-                        eventsByRoom.computeIfAbsent(room) { mutableListOf() }.add(event)
+                    val room = match.groupValues[4]
+                    if (room.startsWith("E") || room.contains("MA") || room.contains("Online")) {
+                        continue
                     }
+
+                    val start = LocalDateTime.parse(match.groupValues[1], dateTimeFormatter)
+                    val end = LocalDateTime.parse(match.groupValues[2], dateTimeFormatter)
+                    val summary = match.groupValues[3].trim()
+                    val event = Event(start, end, summary)
+                    eventsByRoom.computeIfAbsent(room) { mutableListOf() }.add(event)
+                }
             }
             return eventsByRoom.mapValues { it.value.toList() }
         }

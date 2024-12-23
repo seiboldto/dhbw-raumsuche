@@ -18,7 +18,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.dhbw_raumsuche.data.RoomDataProvider
 import com.example.dhbw_raumsuche.network.ICalDataExtractor.Companion.parseICalData
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +42,15 @@ class MainActivity : ComponentActivity() {
     private fun getRoomData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val roomData = RoomDataProvider.getRoomData(this@MainActivity)
-                val eventsByRoom = parseICalData(roomData.iCals)
+                val roomData =
+                    withContext(Dispatchers.IO) { RoomDataProvider.getRoomData(this@MainActivity) }
+                val eventsByRoom =
+                    withContext(Dispatchers.Default) { parseICalData(roomData.iCals) }
                 Log.d("MainActivity", eventsByRoom.keys.toString())
-                }
             }
         }
     }
+}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
