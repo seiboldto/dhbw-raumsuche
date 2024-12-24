@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     kotlin("plugin.serialization") version "1.9.22"
+    id ("kotlin-kapt")
 }
 
 android {
@@ -14,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.dhbw_raumsuche"
-        minSdk = 24
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -26,6 +27,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+
+            kotlinOptions {
+                freeCompilerArgs = listOf("-Xdebug")
+            }
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -100,4 +109,12 @@ dependencies {
     // Optional - Integration with RxJava
     // implementation("androidx.compose.runtime:runtime-rxjava2")
 
+    // most recent version 2.x: compiles with api-14 + java8
+    implementation("org.mnode.ical4j:ical4j:3.2.19")
+
+    // Room local sqlite database
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
 }
