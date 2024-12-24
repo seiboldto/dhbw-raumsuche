@@ -15,11 +15,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.dhbw_raumsuche.data.local.RoomsDatabase
+import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.network.ServerConnector.Companion.downloadAndExtractRoomsData
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val db by lazy { RoomsDatabase.getInstance(applicationContext) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -39,13 +43,12 @@ class MainActivity : ComponentActivity() {
     private fun getRoomsData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val roomsData = downloadAndExtractRoomsData()
-                Log.d("MainActivity", "Data received: $roomsData")
+                val icalParser: ICalParser = ICalParser(applicationContext)
+                icalParser.parseICal()
+                }
             }
         }
     }
-
-}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
