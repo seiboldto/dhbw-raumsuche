@@ -3,7 +3,8 @@ package com.example.dhbw_raumsuche.ical
 import android.content.Context
 import com.example.dhbw_raumsuche.data.local.RoomsDatabase
 import com.example.dhbw_raumsuche.data.local.dao.EventDao
-import com.example.dhbw_raumsuche.network.ServerConnector
+import com.example.dhbw_raumsuche.data.local.entity.EventEntity
+import com.example.dhbw_raumsuche.data.local.entity.RoomEntity
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.Component
@@ -13,20 +14,14 @@ import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.property.Location
 import net.fortuna.ical4j.util.MapTimeZoneCache
 import java.io.StringReader
-
-import com.example.dhbw_raumsuche.data.local.dao.RoomDao
-import com.example.dhbw_raumsuche.data.local.entity.EventEntity
-import com.example.dhbw_raumsuche.data.local.entity.RoomEntity
-import net.fortuna.ical4j.data.ParserException
 import java.sql.Date
 
 
 class ICalParser(private val context: Context) {
     private val db: RoomsDatabase by lazy { RoomsDatabase.getInstance(context) }
-    private val roomDao: RoomDao by lazy { db.roomDao() }
     private val eventDao: EventDao by lazy { db.eventDao() }
 
-    suspend fun parseICal() {
+    suspend fun parseICal(icals: List<String>) {
 
 
         // operate ical4j with minify. see https://stackoverflow.com/questions/50733209/ical4j-2-2-0-using-grape-throws-java-lang-noclassdeffounderror-javax-cache-con
@@ -37,21 +32,11 @@ class ICalParser(private val context: Context) {
         )
 
         val registry: TimeZoneRegistry = TimeZoneRegistryImpl("zoneinfo-outlook-global/")
-        val builder: CalendarBuilder = CalendarBuilder(registry);
-
-        val icals: List<String>
-        try {
-            icals = ServerConnector.downloadAndExtractRoomsData().iCals
-        } catch (e: Exception) {
-            println("Error: $e, Cant fetch Icals")
-            return
-        }
-
+        val builder= CalendarBuilder(registry)
 
         for (ical in icals) {
-            val sin: StringReader = StringReader(cleanMalformedIcal(ical));
-            val calendar: Calendar = builder.build(sin);
-            val events: List<VEvent> = calendar.getComponents(Component.VEVENT)
+            val sin = StringReader(cleanMalformedIcal(ical))
+            val calendar: Calendar = builder.build(sin)
             updateDbFromIcal(calendar)
         }
     }
@@ -63,7 +48,8 @@ class ICalParser(private val context: Context) {
     private suspend fun updateDbFromIcal(calendar: Calendar){
         val events: List<VEvent> = calendar.getComponents(Component.VEVENT)
         // events.forEach({event -> println(event.location)})
-        val locations: List<Location> = events.map { event -> event.location}.filterNotNull().toSet().toList()
+        val locations: List<Location> =
+            events.mapNotNull { event -> event.location }.toSet().toList()
 
         for (location in locations) {
             val room = icalLocationToRoom(location) ?: continue
@@ -73,7 +59,7 @@ class ICalParser(private val context: Context) {
         for (event in events) {
             val eventEntity = icalEventToEventEntity(event)
             if (eventEntity != null) {
-                println("Adding event to database: $eventEntity")
+                // println("Adding event to database: $eventEntity")
                 eventDao.insertEvent(eventEntity)
             }
         }
