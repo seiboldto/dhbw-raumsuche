@@ -3,12 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "1.9.22"
-    id ("kotlin-kapt")
+    id ("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.example.dhbw_raumsuche"
-    compileSdk = 34
+    compileSdk = 35
 
     buildFeatures {
         compose = true
@@ -20,8 +20,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.dhbw_raumsuche"
-        minSdk = 33
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -78,6 +78,8 @@ dependencies {
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
+    implementation(libs.symbol.processing.api)
+
     // Choose one of the following:
     // Material Design 3
     implementation(libs.material3)
@@ -116,11 +118,10 @@ dependencies {
     // implementation("androidx.compose.runtime:runtime-rxjava2")
 
     // most recent version 2.x: compiles with api-14 + java8
-    implementation("org.mnode.ical4j:ical4j:3.2.19")
+    implementation(libs.ical4j)
 
     // Room local sqlite database
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }
