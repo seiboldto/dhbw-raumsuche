@@ -19,10 +19,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.dhbw_raumsuche.data.RoomDataProvider
+import com.example.dhbw_raumsuche.data.local.RoomsDatabase
+import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.location.GPSToLocationService
 import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
 import com.example.dhbw_raumsuche.location.LocationViewModel
-import com.example.dhbw_raumsuche.network.ICalDataExtractor.Companion.parseICalData
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,9 +73,12 @@ class MainActivity : ComponentActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val roomData =
                     withContext(Dispatchers.IO) { RoomDataProvider.getRoomData(this@MainActivity) }
-                val eventsByRoom =
-                    withContext(Dispatchers.Default) { parseICalData(roomData.iCals) }
-                Log.d("MainActivity", eventsByRoom.keys.toString())
+                val parser = withContext(Dispatchers.Default) { ICalParser(this@MainActivity) }
+                parser.parseICal(roomData.iCals)
+
+                val roomDao = RoomsDatabase.getInstance(this@MainActivity).roomDao()
+                val rooms = withContext(Dispatchers.IO) { roomDao.getRooms() }
+                Log.d("MainActivity", rooms.joinToString("\n"))
             }
         }
     }

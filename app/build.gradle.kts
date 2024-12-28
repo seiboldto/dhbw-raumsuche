@@ -3,11 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "1.9.22"
+    id ("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.example.dhbw_raumsuche"
-    compileSdk = 34
+    compileSdk = 35
 
     buildFeatures {
         compose = true
@@ -19,8 +20,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.dhbw_raumsuche"
-        minSdk = 33
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -31,6 +32,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+
+            kotlinOptions {
+                freeCompilerArgs = listOf("-Xdebug")
+            }
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -69,6 +78,8 @@ dependencies {
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
+    implementation(libs.symbol.processing.api)
+
     // Choose one of the following:
     // Material Design 3
     implementation(libs.material3)
@@ -106,4 +117,11 @@ dependencies {
     // Optional - Integration with RxJava
     // implementation("androidx.compose.runtime:runtime-rxjava2")
 
+    // most recent version 2.x: compiles with api-14 + java8
+    implementation(libs.ical4j)
+
+    // Room local sqlite database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }

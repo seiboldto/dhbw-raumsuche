@@ -12,6 +12,15 @@
 #   public *;
 #}
 
+## ical4j also contains groovy code which is not used in android
+-dontwarn groovy.**
+-dontwarn org.codehaus.groovy.**
+-dontwarn org.apache.commons.logging.**
+
+## ical4j specific: replace JCacheTimeZoneCache with MapTimeZoneCache which is much smaller and does not requiere internet access to reload timezones
+-assumenosideeffects class net.fortuna.ical4j.util.JCacheTimeZoneCache
+-keep class net.fortuna.ical4j.util.MapTimeZoneCache
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
