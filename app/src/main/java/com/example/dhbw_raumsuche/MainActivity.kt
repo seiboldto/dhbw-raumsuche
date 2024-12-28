@@ -2,20 +2,21 @@ package com.example.dhbw_raumsuche
 
 import android.Manifest
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.activity.viewModels
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.dhbw_raumsuche.data.RoomDataProvider
@@ -24,12 +25,28 @@ import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.location.GPSToLocationService
 import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
 import com.example.dhbw_raumsuche.location.LocationViewModel
+import com.example.dhbw_raumsuche.ui.RoomScreen
 import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
+import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+
+    private val db by lazy {
+        RoomsDatabase.getInstance(this)
+    }
+
+    private val roomViewModel: RoomViewModel by viewModels<RoomViewModel>(
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return RoomViewModel(db.roomDao()) as T
+                }
+            }
+        }
+    )
 
     private val locationViewModel = LocationViewModel()
     private lateinit var gpsToLocationService: GPSToLocationService
@@ -56,12 +73,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Dhbw_raumsucheTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                val roomListState by roomViewModel.state.collectAsState()
+                RoomScreen(state = roomListState, onEvent = roomViewModel::OnEvent)
             }
         }
         getRoomData()
@@ -75,10 +88,6 @@ class MainActivity : ComponentActivity() {
                     withContext(Dispatchers.IO) { RoomDataProvider.getRoomData(this@MainActivity) }
                 val parser = withContext(Dispatchers.Default) { ICalParser(this@MainActivity) }
                 parser.parseICal(roomData.iCals)
-
-                val roomDao = RoomsDatabase.getInstance(this@MainActivity).roomDao()
-                val rooms = withContext(Dispatchers.IO) { roomDao.getRooms() }
-                Log.d("MainActivity", rooms.joinToString("\n"))
             }
         }
     }
