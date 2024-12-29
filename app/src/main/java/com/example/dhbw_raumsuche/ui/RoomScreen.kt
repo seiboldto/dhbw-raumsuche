@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomListEvent
@@ -55,25 +57,40 @@ fun RoomScreen(
                     }
                 }
             }
-            items(state.rooms) { room ->
+            items(state.rooms) { roomWithEvents ->
                 Row(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
+                        if (roomWithEvents.isFree){
+                            Text(
+                                text = "Frei " + roomWithEvents.getReadableFreeTime(),
+                                fontSize = 12.sp,
+                                color = Color.Magenta
+                            )
+                        }else{
+                            Text(
+                                text = "Belegt",
+                                fontSize = 12.sp,
+                                color = Color.Red
+                            )
+                        }
                         Text(
-                            text = room.roomId,
+                            text = roomWithEvents.room.fullName,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                             fontSize = 20.sp
                         )
-                        Text(
-                            text = room.fullName,
-                            fontSize = 16.sp
-                        )
-                        Text(
-                            text = "Gebäude:${room.building} Etage:${room.floor} Nummer:${room.number}",
-                            fontSize = 12.sp
-                        )
+                        if (roomWithEvents.room.building != "") {
+                            Text(
+                                text = "Gebäude:${roomWithEvents.room.building} Etage:${roomWithEvents.room.floor} Nummer:${roomWithEvents.room.number}",
+                                fontSize = 16.sp
+                            )
+                        }
+
+                        roomWithEvents.eventsToday.forEach { event -> Text(text = event.start.toString() + " " + event.title, color = Color.Blue)}
                     }
                 }
             }
