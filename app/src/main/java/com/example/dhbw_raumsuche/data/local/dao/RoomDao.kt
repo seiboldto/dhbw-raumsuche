@@ -3,7 +3,9 @@ package com.example.dhbw_raumsuche.data.local.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
+import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.data.local.entity.RoomEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -26,4 +28,9 @@ interface RoomDao {
 
     @Query("SELECT * FROM rooms ORDER BY building ASC")
     fun getRoomsSortByBuilding(): Flow<List<RoomEntity>>
+
+    @Query("SELECT * FROM rooms")
+    @Transaction // Ensures that all operations are done in a single transaction
+    fun getRoomsWithEvents(): Flow<List<RoomWithEvents>>
+
 }
