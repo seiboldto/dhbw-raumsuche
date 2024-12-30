@@ -12,11 +12,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -35,17 +35,20 @@ import com.example.dhbw_raumsuche.location.Building
 @Composable
 fun RoomScreen(
     roomViewModel: RoomViewModel
-    ) {
+) {
     val isLoading by roomViewModel.isLoading.collectAsState()
     val roomListState by roomViewModel.roomList.collectAsState()
     val filterSettings by roomViewModel.filterSettings.collectAsState()
     val selectedSortType by roomViewModel.sortType.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+    var expandedSortMenu by remember { mutableStateOf(false) }
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()}
-        } else {
+            CircularProgressIndicator()
+        }
+    } else {
 
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -91,31 +94,35 @@ fun RoomScreen(
                             ) { Text(it.name) }
                         }
                     }
-                    Text("Sort:")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        verticalAlignment = CenterVertically
-                    ) {
-                        RoomSortType.entries.forEach { sortType ->
-                            Row(
-                                modifier = Modifier
-                                    .clickable {
-                                        roomViewModel.setSortType(sortType)
+                    Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                        IconButton(onClick = { expandedSortMenu = true }) {
+                            Icon(Icons.Default.Menu, contentDescription = null)
+                        }
+                        DropdownMenu(
+                            expanded = expandedSortMenu,
+                            onDismissRequest = { expandedSortMenu = false }) {
+                            RoomSortType.entries.forEach { sortType ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = sortType.name
+                                        )
                                     },
-                                verticalAlignment = CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = selectedSortType == sortType,
                                     onClick = {
                                         roomViewModel.setSortType(sortType)
+                                        expandedSortMenu = false
+                                    },
+                                    leadingIcon = {
+                                        if (selectedSortType == sortType) Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null
+                                        )
                                     }
                                 )
-                                Text(text = sortType.name)
                             }
                         }
                     }
+
                     LazyColumn(
                         contentPadding = PaddingValues(16.dp),
                         modifier = Modifier.fillMaxSize(),
@@ -143,7 +150,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
     )
     //favorite
     var favorite by remember { mutableStateOf(false) }
-    val starcolor = if(favorite) Color.Yellow else Color.Black    //starcolor when favored
+    val starcolor = if (favorite) Color.Yellow else Color.Black    //starcolor when favored
 
     // Material3 Card for a block item
     Card(
