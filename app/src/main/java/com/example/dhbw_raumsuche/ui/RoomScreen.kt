@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -26,7 +27,9 @@ import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomSortType
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.sp
 import com.example.dhbw_raumsuche.location.Building
+import com.example.dhbw_raumsuche.ui.theme.darkgreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,9 +164,6 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
     val rotationState by animateFloatAsState(
         targetValue = if (expandedState) 180f else 0f
     )
-    //favorite
-    var favorite by remember { mutableStateOf(false) }
-    val starcolor = if (favorite) Color.Yellow else Color.Black    //starcolor when favored
 
     // Material3 Card for a block item
     Card(
@@ -190,42 +190,90 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
                 .padding(16.dp)
         ) {
             if (!expandedState) {
-                Text(
-                    text = roomWithEvents.room.fullName,
-                    style = MaterialTheme.typography.bodyLarge.copy( // Use Material3 typography
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer, // Contrast color
+                Row(
+                    verticalAlignment = CenterVertically,
                     modifier = Modifier.align(Alignment.CenterStart)
-                )
+                        .fillMaxWidth(0.90f)
+                ) {
+                    Text(
+                        text = roomWithEvents.room.fullName,
+                        style = MaterialTheme.typography.bodyLarge.copy( // Use Material3 typography
+                            fontWeight = FontWeight.Bold
+                        ),
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer, // Contrast color
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ShowRoomStatus(roomWithEvents)
+                }
+                Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    ShowFavStar()
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Drop-down Arrow",
+                        modifier = Modifier
+                            .rotate(rotationState)
+                            .clickable { expandedState = !expandedState },
+                    )
+                }
             } else {
-                Text(
-                    text = roomWithEvents.room.fullName,
-                    style = MaterialTheme.typography.bodyLarge.copy( // Use Material3 typography
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer, // Contrast color
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-            }
-            Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-                Icon(
-                    Icons.Default.Star,
-                    contentDescription = "Star",
-                    modifier = Modifier
-                        .clickable { favorite = !favorite },
-                    tint = starcolor
-                )
-
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Drop-down Arrow",
-                    modifier = Modifier
-                        .rotate(rotationState)
-                        .clickable { expandedState = !expandedState },
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.90f)
+                ) {
+                    Text(
+                        text = roomWithEvents.room.fullName,
+                        style = MaterialTheme.typography.bodyLarge.copy( // Use Material3 typography
+                            fontWeight = FontWeight.Bold
+                        ),
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer, // Contrast color
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ShowRoomStatus(roomWithEvents)
+                }
+                Row(modifier = Modifier.align(Alignment.TopEnd)) {
+                    ShowFavStar()
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Drop-down Arrow",
+                        modifier = Modifier
+                            .rotate(rotationState)
+                            .clickable { expandedState = !expandedState },
+                    )
+                }
             }
         }
     }
+}
 
+@Composable
+private fun ShowFavStar() {
+    //favorite
+    var favorite by remember { mutableStateOf(false) }
+    val starcolor = if(favorite) Color.Yellow else Color.Black    //starcolor when favored
+
+    Icon(
+        Icons.Default.Star,
+        contentDescription = "Star",
+        modifier = Modifier
+            .clickable { favorite = !favorite },
+        tint = starcolor
+    )
+}
+
+@Composable
+private fun ShowRoomStatus(roomWithEvents: RoomWithEvents) {
+    if (roomWithEvents.isFree) {
+        Text(
+            text = "Frei " + roomWithEvents.getReadableFreeTime(),
+            fontSize = 12.sp,
+            color = darkgreen
+        )
+    } else {
+        Text(
+            text = "Belegt",
+            fontSize = 12.sp,
+            color = Color.Red
+        )
+    }
 }
