@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return RoomViewModel(db.roomDao()) as T
+                    return RoomViewModel(db.roomDao()) { getRoomData() } as T
                 }
             }
         }
@@ -69,12 +69,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Dhbw_raumsucheTheme {
-                val roomListState by roomViewModel.state.collectAsState()
-                RoomScreen(state = roomListState, onEvent = roomViewModel::OnEvent)
+                RoomScreen(roomViewModel)
             }
         }
-        getRoomData()
-        updateLocation()
+        //updateLocation()
     }
 
     private fun getRoomData() {
