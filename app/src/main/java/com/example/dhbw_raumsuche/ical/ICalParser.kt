@@ -22,8 +22,6 @@ class ICalParser(private val context: Context) {
     private val eventDao: EventDao by lazy { db.eventDao() }
 
     suspend fun parseICal(icals: List<String>) {
-
-
         // operate ical4j with minify. see https://stackoverflow.com/questions/50733209/ical4j-2-2-0-using-grape-throws-java-lang-noclassdeffounderror-javax-cache-con
         MapTimeZoneCache() // tell proguard that the class is used
         System.setProperty(
@@ -32,7 +30,7 @@ class ICalParser(private val context: Context) {
         )
 
         val registry: TimeZoneRegistry = TimeZoneRegistryImpl("zoneinfo-outlook-global/")
-        val builder= CalendarBuilder(registry)
+        val builder = CalendarBuilder(registry)
 
         for (ical in icals) {
             val sin = StringReader(cleanMalformedIcal(ical))
@@ -45,9 +43,8 @@ class ICalParser(private val context: Context) {
         return calendarString.replace("\\n\\s".toRegex(), "")
     }
 
-    private suspend fun updateDbFromIcal(calendar: Calendar){
+    private suspend fun updateDbFromIcal(calendar: Calendar) {
         val events: List<VEvent> = calendar.getComponents(Component.VEVENT)
-        // events.forEach({event -> println(event.location)})
         val locations: List<Location> =
             events.mapNotNull { event -> event.location }.toSet().toList()
 
@@ -59,7 +56,6 @@ class ICalParser(private val context: Context) {
         for (event in events) {
             val eventEntity = icalEventToEventEntity(event)
             if (eventEntity != null) {
-                // println("Adding event to database: $eventEntity")
                 eventDao.insertEvent(eventEntity)
             }
         }
@@ -88,7 +84,7 @@ class ICalParser(private val context: Context) {
         return matchIdResult?.groupValues?.get(1)
     }
 
-    private fun icalLocationToRoom(location: Location): RoomEntity?{
+    private fun icalLocationToRoom(location: Location): RoomEntity? {
         val id = getRoomId(location) ?: return null
 
         val matchDetailResult: MatchResult? = "([0-9])([0-9][0-9])([A-Z])".toRegex().find(id)
@@ -107,7 +103,6 @@ class ICalParser(private val context: Context) {
     }
 
     private suspend fun addRoomToDatabase(room: RoomEntity) {
-        // println("Adding room to database: $room")
         db.roomDao().insertRoom(room)
     }
 }

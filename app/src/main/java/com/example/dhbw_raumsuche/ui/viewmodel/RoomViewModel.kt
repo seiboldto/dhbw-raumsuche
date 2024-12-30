@@ -1,5 +1,6 @@
 package com.example.dhbw_raumsuche.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,10 +18,6 @@ import kotlinx.coroutines.launch
 class RoomViewModel(
     private val roomDao: RoomDao, private val getRoomData: () -> Unit
 ) : ViewModel() {
-
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
     // Directly collect the flow of rooms with events from the DAO
     private val _rooms = MutableStateFlow<List<RoomWithEvents>>(emptyList())
 
@@ -58,11 +55,10 @@ class RoomViewModel(
 
     private fun loadRooms() {
         viewModelScope.launch {
-            _isLoading.emit(true)
             getRoomData()
             CoroutineScope(Dispatchers.IO).launch {
                 _rooms.emit(roomDao.getRoomsWithEvents())
-                _isLoading.emit(false)
+
             }
         }
     }
@@ -88,14 +84,14 @@ class RoomViewModel(
 //    }
 
     /*
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val _rooms = _sortType.flatMapLatest { sortType ->
-        when (sortType) {
-            RoomSortType.ROOM_ID -> roomDao.getRooms()
-            RoomSortType.FLOOR -> roomDao.getRoomsSortByFloor()
-            RoomSortType.BUILDING -> roomDao.getRoomsSortByBuilding()
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
-    */
+@OptIn(ExperimentalCoroutinesApi::class)
+private val _rooms = _sortType.flatMapLatest { sortType ->
+    when (sortType) {
+        RoomSortType.ROOM_ID -> roomDao.getRooms()
+        RoomSortType.FLOOR -> roomDao.getRoomsSortByFloor()
+        RoomSortType.BUILDING -> roomDao.getRoomsSortByBuilding()
+    }
+}.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+*/
 
 }

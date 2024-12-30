@@ -20,7 +20,7 @@ import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.location.GPSToLocationService
 import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
 import com.example.dhbw_raumsuche.location.LocationViewModel
-import com.example.dhbw_raumsuche.ui.RoomScreen
+import com.example.dhbw_raumsuche.ui.RoomScreenLoader
 import com.example.dhbw_raumsuche.ui.theme.CustomTheme
 import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
@@ -48,12 +48,14 @@ class MainActivity : ComponentActivity() {
     )
 
     private val settingsViewModel: SettingsViewModel by viewModels<SettingsViewModel>(
-        factoryProducer = { object: ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return SettingsViewModel(applicationContext.dataStore) as T
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHECKED_CAST")
+                    return SettingsViewModel(applicationContext.dataStore) as T
+                }
             }
-        }}
+        }
     )
 
     private val locationViewModel = LocationViewModel()
@@ -81,9 +83,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CompositionLocalProvider (LocalSettingsModel provides settingsViewModel) {
+            CompositionLocalProvider(LocalSettingsModel provides settingsViewModel) {
                 CustomTheme {
-                    RoomScreen(roomViewModel)
+                    RoomScreenLoader(roomViewModel, settingsViewModel)
                 }
             }
         }
@@ -92,10 +94,17 @@ class MainActivity : ComponentActivity() {
     private fun getRoomData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val roomData =
-                    withContext(Dispatchers.IO) { RoomDataProvider.getRoomData(this@MainActivity) }
-                val parser = withContext(Dispatchers.Default) { ICalParser(this@MainActivity) }
-                parser.parseICal(roomData.iCals)
+                settingsViewModel.setIsLoading(true)
+
+                try {
+                    val roomData =
+                        withContext(Dispatchers.IO) { RoomDataProvider.getRoomData(this@MainActivity) }
+                    settingsViewModel.setIsLoading(false)
+                    val parser = withContext(Dispatchers.Default) { ICalParser(this@MainActivity) }
+                    parser.parseICal(roomData.iCals)
+                } catch (err: Throwable) {
+                    settingsViewModel.setError(err)
+                }
             }
         }
     }

@@ -21,6 +21,12 @@ enum class Theme {
 }
 
 class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _error = MutableStateFlow<Throwable?>(null)
+    val error: StateFlow<Throwable?> = _error
+
     private val _theme = MutableStateFlow(Theme.System)
     val theme: StateFlow<Theme> get() = _theme
 
@@ -39,6 +45,14 @@ class SettingsViewModel(private val dataStore: DataStore<Preferences>) : ViewMod
             }
         }
         _theme.value = theme
+    }
+
+    fun setIsLoading(isLoading: Boolean) {
+        _isLoading.value = isLoading
+    }
+
+    fun setError(error: Throwable) {
+        _error.value = error
     }
 }
 

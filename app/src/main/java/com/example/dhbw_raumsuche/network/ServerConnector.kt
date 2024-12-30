@@ -17,22 +17,17 @@ class ServerConnector {
         }
 
         private suspend fun fetchRoomData(client: OkHttpClient, request: Request): String {
-            try {
-                val response = withContext(IO) { client.newCall(request).execute() }
+            val response = withContext(IO) { client.newCall(request).execute() }
 
-                if (!response.isSuccessful) {
-                    throw Exception("Failed to download file: ${response.code}")
-                }
+            if (!response.isSuccessful) {
+                throw Exception("Failed to download file: ${response.code}")
+            }
 
-                return withContext(IO) {
-                    GZIPInputStream(response.body.byteStream()).use { gzipStream ->
-                        val reader = InputStreamReader(gzipStream)
-                        reader.readText()
-                    }
+            return withContext(IO) {
+                GZIPInputStream(response.body.byteStream()).use { gzipStream ->
+                    val reader = InputStreamReader(gzipStream)
+                    reader.readText()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return ""
             }
         }
 
