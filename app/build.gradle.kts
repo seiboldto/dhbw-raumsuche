@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "1.9.22"
-    id ("com.google.devtools.ksp")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -69,8 +69,8 @@ android {
 }
 
 dependencies {
-
-    implementation(libs.okhttp)
+    implementation(libs.androidx.datastore.preferences)
+    implementation (libs.okhttp)
     implementation(libs.jetbrains.kotlinx.serialization.json.v163)
     implementation(libs.play.services.location)
 
