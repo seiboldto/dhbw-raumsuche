@@ -25,9 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomSortType
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
 import com.example.dhbw_raumsuche.location.Building
 
 
@@ -62,19 +60,8 @@ fun RoomScreen(
                     title = {
                         Text(
                             "Raumsuche",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
                         )
-                    },
-                    actions = {
-                        IconButton(onClick = { /* do something */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = "Einstellungen"
-                            )
-                        }
-                    },
-                    scrollBehavior = scrollBehavior,
+                    }
                 )
             },
         ) { innerPadding ->
@@ -83,11 +70,16 @@ fun RoomScreen(
                 .padding(innerPadding),
 
                 content = {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
                             InputChip(
                                 onClick = { expandedBuildingMenu = true },
-                                label = { Text(text = "Gebäude") },
+                                label = { Text(text = if (filterSettings.selectedBuildings.isNotEmpty()) filterSettings.selectedBuildings.joinToString() else "Gebäude") },
                                 selected = filterSettings.selectedBuildings.isNotEmpty(),
                                 leadingIcon = {
                                     Icon(
