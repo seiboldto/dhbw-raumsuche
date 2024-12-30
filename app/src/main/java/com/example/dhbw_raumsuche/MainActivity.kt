@@ -8,9 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.activity.viewModels
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -23,8 +21,10 @@ import com.example.dhbw_raumsuche.location.GPSToLocationService
 import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
 import com.example.dhbw_raumsuche.location.LocationViewModel
 import com.example.dhbw_raumsuche.ui.RoomScreen
-import com.example.dhbw_raumsuche.ui.theme.Dhbw_raumsucheTheme
+import com.example.dhbw_raumsuche.ui.theme.CustomTheme
+import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
+import com.example.dhbw_raumsuche.ui.viewmodel.SettingsModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
 
     private val locationViewModel = LocationViewModel()
     private lateinit var gpsToLocationService: GPSToLocationService
+    private val settingsModel = SettingsModel()
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -68,12 +69,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         gpsToLocationService = GPSToLocationService(this)
         enableEdgeToEdge()
+
         setContent {
-            Dhbw_raumsucheTheme {
-                RoomScreen(roomViewModel)
+            CompositionLocalProvider (LocalSettingsModel provides settingsModel) {
+                CustomTheme {
+                    RoomScreen(roomViewModel)
+                }
             }
         }
-        //updateLocation()
     }
 
     private fun getRoomData() {

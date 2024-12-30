@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +31,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.sp
 import com.example.dhbw_raumsuche.location.Building
 import com.example.dhbw_raumsuche.ui.theme.darkgreen
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,115 +45,137 @@ fun RoomScreen(
     val selectedSortType by roomViewModel.sortType.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    var expandedSortMenu by remember { mutableStateOf(false) }
-    var expandedBuildingMenu by remember { mutableStateOf(false) }
+    var sortMenuExpanded by remember { mutableStateOf(false) }
+    var buildingMenuExpanded by remember { mutableStateOf(false) }
+
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = { ModalDrawerSheet { SettingsDrawer() } }) {
+            Scaffold(
+                modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.primary,
+                        ),
+                        title = {
+                            Text(
+                                "Raumsuche",
+                            )
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    drawerState.apply {
+                                        if (isClosed) open() else close()
+                                    }
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = "Einstellungen"
+                                )
+                            }
+                        },
+                    )
+                },
+            ) { innerPadding ->
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                    content = {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                                InputChip(
+                                    onClick = { buildingMenuExpanded = true },
+                                    label = { Text(text = if (filterSettings.selectedBuildings.isNotEmpty()) filterSettings.selectedBuildings.joinToString() else "Gebäude") },
+                                    selected = filterSettings.selectedBuildings.isNotEmpty(),
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.Home,
+                                            contentDescription = null
+                                        )
+                                    })
+                                DropdownMenu(
+                                    expanded = buildingMenuExpanded,
+                                    onDismissRequest = { buildingMenuExpanded = false }) {
+                                    Building.entries.forEach { building ->
+                                        DropdownMenuItem(
+                                            text = { Text(text = building.name) },
+                                            onClick = {
+                                                roomViewModel.setBuildingFilter(building)
+                                            },
+                                            leadingIcon = {
+                                                if (filterSettings.selectedBuildings.contains(
+                                                        building
+                                                    )
+                                                ) Icon(
+                                                    Icons.Default.Check,
+                                                    contentDescription = null
+                                                )
+                                            })
+                                    }
+                                }
+                            }
+                            Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                                IconButton(onClick = { sortMenuExpanded = true }) {
+                                    Icon(Icons.AutoMirrored.Default.List, contentDescription = null)
+                                }
+                                DropdownMenu(
+                                    expanded = sortMenuExpanded,
+                                    onDismissRequest = { sortMenuExpanded = false }) {
+                                    RoomSortType.entries.forEach { sortType ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = sortType.name
+                                                )
+                                            },
+                                            onClick = {
+                                                roomViewModel.setSortType(sortType)
+                                                sortMenuExpanded = false
+                                            },
+                                            leadingIcon = {
+                                                if (selectedSortType == sortType) Icon(
+                                                    Icons.Default.Check,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        )
+                                    }
 
-        Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                    ),
-                    title = {
-                        Text(
-                            "Raumsuche",
-                        )
+                                }
+                            }
+                        }
+                        HorizontalDivider()
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(roomListState) { roomWithEvents ->
+                                RoomListItem(roomWithEvents)
+                            }
+                        }
                     }
                 )
-            },
-        ) { innerPadding ->
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            }
 
-                content = {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-                            InputChip(
-                                onClick = { expandedBuildingMenu = true },
-                                label = { Text(text = if (filterSettings.selectedBuildings.isNotEmpty()) filterSettings.selectedBuildings.joinToString() else "Gebäude") },
-                                selected = filterSettings.selectedBuildings.isNotEmpty(),
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Home,
-                                        contentDescription = null
-                                    )
-                                })
-                            DropdownMenu(
-                                expanded = expandedBuildingMenu,
-                                onDismissRequest = { expandedBuildingMenu = false }) {
-                                Building.entries.forEach { building ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = building.name) },
-                                        onClick = {
-                                            roomViewModel.setBuildingFilter(building)
-                                        },
-                                        leadingIcon = {
-                                            if (filterSettings.selectedBuildings.contains(building)) Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        })
-                                }
-                            }
-                        }
-                        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-                            IconButton(onClick = { expandedSortMenu = true }) {
-                                Icon(Icons.AutoMirrored.Default.List, contentDescription = null)
-                            }
-                            DropdownMenu(
-                                expanded = expandedSortMenu,
-                                onDismissRequest = { expandedSortMenu = false }) {
-                                RoomSortType.entries.forEach { sortType ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = sortType.name
-                                            )
-                                        },
-                                        onClick = {
-                                            roomViewModel.setSortType(sortType)
-                                            expandedSortMenu = false
-                                        },
-                                        leadingIcon = {
-                                            if (selectedSortType == sortType) Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    )
-                                }
-
-                            }
-                        }
-                    }
-                    HorizontalDivider()
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(roomListState) { roomWithEvents ->
-                            RoomListItem(roomWithEvents)
-                        }
-                    }
-                }
-            )
         }
-
     }
 }
 
@@ -192,7 +216,8 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
             if (!expandedState) {
                 Row(
                     verticalAlignment = CenterVertically,
-                    modifier = Modifier.align(Alignment.CenterStart)
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
                         .fillMaxWidth(0.90f)
                 ) {
                     Text(
@@ -250,7 +275,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
 private fun ShowFavStar() {
     //favorite
     var favorite by remember { mutableStateOf(false) }
-    val starcolor = if(favorite) Color.Yellow else Color.Black    //starcolor when favored
+    val starcolor = if (favorite) Color.Yellow else Color.Black    //starcolor when favored
 
     Icon(
         Icons.Default.Star,
