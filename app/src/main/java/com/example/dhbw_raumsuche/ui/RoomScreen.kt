@@ -5,14 +5,14 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,6 +43,7 @@ fun RoomScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     var expandedSortMenu by remember { mutableStateOf(false) }
+    var expandedBuildingMenu by remember { mutableStateOf(false) }
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -80,49 +81,69 @@ fun RoomScreen(
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
+
                 content = {
-                    Text("Filter:")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Building.entries.forEach {
-                            Button(
-                                onClick = { roomViewModel.setBuildingFilter(it) }
-                            ) { Text(it.name) }
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                            InputChip(
+                                onClick = { expandedBuildingMenu = true },
+                                label = { Text(text = "Gebäude") },
+                                selected = filterSettings.selectedBuildings.isNotEmpty(),
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Home,
+                                        contentDescription = null
+                                    )
+                                })
+                            DropdownMenu(
+                                expanded = expandedBuildingMenu,
+                                onDismissRequest = { expandedBuildingMenu = false }) {
+                                Building.entries.forEach { building ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = building.name) },
+                                        onClick = {
+                                            roomViewModel.setBuildingFilter(building)
+                                        },
+                                        leadingIcon = {
+                                            if (filterSettings.selectedBuildings.contains(building)) Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null
+                                            )
+                                        })
+                                }
+                            }
                         }
-                    }
-                    Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-                        IconButton(onClick = { expandedSortMenu = true }) {
-                            Icon(Icons.Default.Menu, contentDescription = null)
-                        }
-                        DropdownMenu(
-                            expanded = expandedSortMenu,
-                            onDismissRequest = { expandedSortMenu = false }) {
-                            RoomSortType.entries.forEach { sortType ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = sortType.name
-                                        )
-                                    },
-                                    onClick = {
-                                        roomViewModel.setSortType(sortType)
-                                        expandedSortMenu = false
-                                    },
-                                    leadingIcon = {
-                                        if (selectedSortType == sortType) Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null
-                                        )
-                                    }
-                                )
+                        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                            IconButton(onClick = { expandedSortMenu = true }) {
+                                Icon(Icons.AutoMirrored.Default.List, contentDescription = null)
+                            }
+                            DropdownMenu(
+                                expanded = expandedSortMenu,
+                                onDismissRequest = { expandedSortMenu = false }) {
+                                RoomSortType.entries.forEach { sortType ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = sortType.name
+                                            )
+                                        },
+                                        onClick = {
+                                            roomViewModel.setSortType(sortType)
+                                            expandedSortMenu = false
+                                        },
+                                        leadingIcon = {
+                                            if (selectedSortType == sortType) Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    )
+                                }
+
                             }
                         }
                     }
-
+                    HorizontalDivider()
                     LazyColumn(
                         contentPadding = PaddingValues(16.dp),
                         modifier = Modifier.fillMaxSize(),
