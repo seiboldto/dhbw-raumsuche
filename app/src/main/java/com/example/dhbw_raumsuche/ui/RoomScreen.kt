@@ -23,69 +23,113 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
-import com.example.dhbw_raumsuche.ui.viewmodel.RoomListEvent
-import com.example.dhbw_raumsuche.ui.viewmodel.RoomListState
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomSortType
-
-@Composable
-fun RoomScreen(
-    state: RoomListState,
-    onEvent: (RoomListEvent) -> Unit,
-    ) {
-    Scaffold(topBar = { AppTopBar() }) { innerPadding ->
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp, innerPadding.calculateTopPadding()),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    verticalAlignment = CenterVertically
-                ) {
-                    RoomSortType.entries.forEach { sortType ->
-                        Row(
-                            modifier = Modifier
-                                .clickable {
-                                    onEvent(RoomListEvent.SortRooms(sortType))
-                                },
-                            verticalAlignment = CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = state.sortType == sortType,
-                                onClick = {
-                                    onEvent(RoomListEvent.SortRooms(sortType))
-                                }
-                            )
-                            Text(text = sortType.name)
-                        }
-                    }
-                }
-            }
-            items(state.rooms) { roomWithEvents ->
-                RoomListItem(roomWithEvents)
-            }
-        }
-    }
-}
+import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
+import com.example.dhbw_raumsuche.location.Building
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppTopBar() {
-    // Stable CenterAlignedTopAppBar
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
-        title = {
-            Text("DHBW-Roomsearch")
-        }
-    )
+fun RoomScreen(
+    roomViewModel: RoomViewModel
+    ) {
+    val isLoading by roomViewModel.isLoading.collectAsState()
+    val roomListState by roomViewModel.roomList.collectAsState()
+    val filterSettings by roomViewModel.filterSettings.collectAsState()
+    val selectedSortType by roomViewModel.sortType.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()}
+        } else {
+
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    title = {
+                        Text(
+                            "Raumsuche",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { /* do something */ }) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Einstellungen"
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+        ) { innerPadding ->
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+                content = {
+                    Text("Filter:")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Building.entries.forEach {
+                            Button(
+                                onClick = { roomViewModel.setBuildingFilter(it) }
+                            ) { Text(it.name) }
+                        }
+                    }
+                    Text("Sort:")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        verticalAlignment = CenterVertically
+                    ) {
+                        RoomSortType.entries.forEach { sortType ->
+                            Row(
+                                modifier = Modifier
+                                    .clickable {
+                                        roomViewModel.setSortType(sortType)
+                                    },
+                                verticalAlignment = CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = selectedSortType == sortType,
+                                    onClick = {
+                                        roomViewModel.setSortType(sortType)
+                                    }
+                                )
+                                Text(text = sortType.name)
+                            }
+                        }
+                    }
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(roomListState) { roomWithEvents ->
+                            RoomListItem(roomWithEvents)
+                        }
+                    }
+                }
+            )
+        }
+
+    }
 }
 
 @Composable
@@ -106,7 +150,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
         modifier = Modifier
             .fillMaxWidth(1f) // Adjust width
             .height(if (expandedState) 200.dp else 80.dp) // Fixed height
-            .animateContentSize (
+            .animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,
                     easing = LinearOutSlowInEasing
@@ -124,7 +168,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-        ){
+        ) {
             if (!expandedState) {
                 Text(
                     text = roomWithEvents.room.fullName,
@@ -162,6 +206,6 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
                 )
             }
         }
-
     }
+
 }
