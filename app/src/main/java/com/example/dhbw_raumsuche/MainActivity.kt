@@ -20,7 +20,7 @@ import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.location.GPSToLocationService
 import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
 import com.example.dhbw_raumsuche.location.LocationViewModel
-import com.example.dhbw_raumsuche.ui.RoomScreenLoader
+import com.example.dhbw_raumsuche.ui.LoadingScreen
 import com.example.dhbw_raumsuche.ui.theme.CustomTheme
 import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             CompositionLocalProvider(LocalSettingsModel provides settingsViewModel) {
                 CustomTheme {
-                    RoomScreenLoader(roomViewModel, settingsViewModel)
+                   LoadingScreen(roomViewModel, settingsViewModel)
                 }
             }
         }
