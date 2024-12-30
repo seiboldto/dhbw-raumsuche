@@ -24,7 +24,8 @@ import com.example.dhbw_raumsuche.ui.RoomScreen
 import com.example.dhbw_raumsuche.ui.theme.CustomTheme
 import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
-import com.example.dhbw_raumsuche.ui.viewmodel.SettingsModel
+import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
+import com.example.dhbw_raumsuche.ui.viewmodel.dataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,15 +40,24 @@ class MainActivity : ComponentActivity() {
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHECKED_CAST")
                     return RoomViewModel(db.roomDao()) { getRoomData() } as T
                 }
             }
         }
     )
 
+    private val settingsViewModel: SettingsViewModel by viewModels<SettingsViewModel>(
+        factoryProducer = { object: ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return SettingsViewModel(applicationContext.dataStore) as T
+            }
+        }}
+    )
+
     private val locationViewModel = LocationViewModel()
     private lateinit var gpsToLocationService: GPSToLocationService
-    private val settingsModel = SettingsModel()
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -71,7 +81,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CompositionLocalProvider (LocalSettingsModel provides settingsModel) {
+            CompositionLocalProvider (LocalSettingsModel provides settingsViewModel) {
                 CustomTheme {
                     RoomScreen(roomViewModel)
                 }
