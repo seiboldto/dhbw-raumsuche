@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,7 +23,7 @@ fun SettingsDrawer() {
     val settings = LocalSettingsModel.current
     val selectedTheme = settings.theme.collectAsState()
 
-    Text("DHBW Raumsuche", modifier = Modifier.padding(16.dp))
+    Text("DHBW Raumsuche", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
     HorizontalDivider()
     Column(modifier = Modifier
         .padding(16.dp)
