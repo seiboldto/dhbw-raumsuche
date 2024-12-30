@@ -10,8 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
@@ -73,12 +71,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Dhbw_raumsucheTheme {
-                val roomListState by roomViewModel.state.collectAsState()
-                RoomScreen(state = roomListState, onEvent = roomViewModel::OnEvent)
+                RoomScreen(roomViewModel)
             }
         }
         getRoomData()
-        updateLocation()
+        //updateLocation()
     }
 
     private fun getRoomData() {

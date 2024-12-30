@@ -4,41 +4,65 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.dhbw_raumsuche.data.local.dao.RoomDao
+import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
+import com.example.dhbw_raumsuche.location.Building
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class RoomViewModel(
     private val roomDao: RoomDao
 ) : ViewModel() {
 
-    // State flows for rooms and filters
-    private val _state = MutableStateFlow(RoomListState())
-    private val _sortType = MutableStateFlow(RoomSortType.ROOM_ID)
-
     // Directly collect the flow of rooms with events from the DAO
     private val _rooms = roomDao.getRoomsWithEvents()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    // State flows for sort types and filters
+    private val _filterSettings = MutableStateFlow(RoomFilterSettings())
+    val filterSettings: StateFlow<RoomFilterSettings> = _filterSettings
 
-    val state = combine(_state, _sortType, _rooms) { state, sortType, rooms ->
-            val sortedRooms = when (sortType) {
-                RoomSortType.ROOM_ID -> rooms.sortedBy { it.room.roomId }
-                RoomSortType.BUILDING -> rooms.sortedBy { it.room.building }
-                RoomSortType.FLOOR -> rooms.sortedBy { it.room.floor }}
-            state.copy(
-                rooms = sortedRooms,
-                sortType = sortType
-            )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RoomListState())
+    private val _sortType = MutableStateFlow(RoomSortType.ROOM_ID)
+    val sortType: StateFlow<RoomSortType> = _sortType
 
-    fun OnEvent(event: RoomListEvent) {
-        when (event) {
-            is RoomListEvent.SortRooms -> {
-                _sortType.value = event.sortType
+    val roomList: StateFlow<List<RoomWithEvents>> =
+        combine(_rooms, _filterSettings, _sortType) { rooms, filterSettings, sortType ->
+            val filteredRooms = filterRooms(rooms, filterSettings)
+            when (sortType) {
+                RoomSortType.ROOM_ID -> filteredRooms.sortedBy { it.room.roomId }
+                RoomSortType.BUILDING -> filteredRooms.sortedBy { it.room.building }
+                RoomSortType.FLOOR -> filteredRooms.sortedBy { it.room.floor }
             }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private fun filterRooms(
+        rooms: List<RoomWithEvents>,
+        filterSettings: RoomFilterSettings
+    ): List<RoomWithEvents> {
+        return rooms.filter {
+            (filterSettings.selectedBuildings.isEmpty() || it.building.isNotEmpty() && filterSettings.selectedBuildings.contains(
+                Building.valueOf(it.building)
+            ))
         }
     }
+
+    fun setSortType(sortType: RoomSortType) {
+        viewModelScope.launch { _sortType.emit(sortType) }
+    }
+
+    fun setBuildingFilter(building: Building) {
+        viewModelScope.launch { _filterSettings.emit(_filterSettings.value.updateBuildings(building)) }
+    }
+
+//    fun OnEvent(event: RoomListEvent) {
+//        when (event) {
+//            is RoomListEvent.SortRooms -> {
+//                _sortType.value = event.sortType
+//            }
+//        }
+//    }
 
     /*
     @OptIn(ExperimentalCoroutinesApi::class)

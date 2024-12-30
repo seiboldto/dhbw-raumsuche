@@ -14,7 +14,7 @@ data class RoomWithEvents(
         entityColumn = "roomId"
     )
     val events: List<EventEntity> // List of associated events
-){
+) {
     val eventsToday: List<EventEntity>
         get() {
             val todayStart = getTodayStart()
@@ -33,7 +33,9 @@ data class RoomWithEvents(
         }
 
     val isOccupied: Boolean
-        get() {return !isFree}
+        get() {
+            return !isFree
+        }
 
     val freeTime: Long
         get() {
@@ -43,6 +45,11 @@ data class RoomWithEvents(
                 .minByOrNull { it.start.time }
 
             return nextEvent?.start?.time?.minus(now) ?: Long.MAX_VALUE
+        }
+
+    val building: String
+        get() {
+            return room.building
         }
 
     fun getReadableFreeTime(): String {
