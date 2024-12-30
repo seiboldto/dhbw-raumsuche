@@ -1,12 +1,13 @@
 package com.example.dhbw_raumsuche.location
 
+// This is a mapping of buildings to their coordinates.
+// The height above sea level is also stored for each level.
 data class DHBWBuilding(
     val building: Building,
     val latitude: Double,
     val longitude: Double,
     val floors: Map<Floor, Double>
 ) {
-
     companion object {
         val buildings = setOf(
             DHBWBuilding(
