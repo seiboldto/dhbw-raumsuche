@@ -31,6 +31,6 @@ interface RoomDao {
 
     @Query("SELECT * FROM rooms")
     @Transaction // Ensures that all operations are done in a single transaction
-    fun getRoomsWithEvents(): Flow<List<RoomWithEvents>>
+    suspend fun getRoomsWithEvents(): List<RoomWithEvents>
 
 }

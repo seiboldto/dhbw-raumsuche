@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.dhbw_raumsuche.data.local.dao.RoomDao
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.location.Building
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -13,12 +15,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RoomViewModel(
-    private val roomDao: RoomDao
+    private val roomDao: RoomDao, private val getRoomData: () -> Unit
 ) : ViewModel() {
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     // Directly collect the flow of rooms with events from the DAO
-    private val _rooms = roomDao.getRoomsWithEvents()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    private val _rooms = MutableStateFlow<List<RoomWithEvents>>(emptyList())
 
     // State flows for sort types and filters
     private val _filterSettings = MutableStateFlow(RoomFilterSettings())
@@ -48,12 +52,31 @@ class RoomViewModel(
         }
     }
 
+    init {
+        loadRooms()
+    }
+
+    private fun loadRooms() {
+        viewModelScope.launch {
+            _isLoading.emit(true)
+            getRoomData()
+            CoroutineScope(Dispatchers.IO).launch {
+                _rooms.emit(roomDao.getRoomsWithEvents())
+                _isLoading.emit(false)
+            }
+        }
+    }
+
     fun setSortType(sortType: RoomSortType) {
         viewModelScope.launch { _sortType.emit(sortType) }
     }
 
     fun setBuildingFilter(building: Building) {
-        viewModelScope.launch { _filterSettings.emit(_filterSettings.value.updateBuildings(building)) }
+        viewModelScope.launch {
+            _filterSettings.value = _filterSettings.value.copy(
+                selectedBuildings = _filterSettings.value.updateBuildings(building)
+            )
+        }
     }
 
 //    fun OnEvent(event: RoomListEvent) {
