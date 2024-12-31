@@ -50,7 +50,7 @@ fun MainScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { ModalDrawerSheet { SettingsDrawer() } }) {
+        drawerContent = { ModalDrawerSheet { SettingsDrawer(roomViewModel) } }) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {

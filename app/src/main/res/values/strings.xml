@@ -19,4 +19,6 @@
     <string name="no_rooms">Keine Räume gefunden.</string>
     <string name="clear">Löschen</string>
     <string name="favorites">Favoriten</string>
+    <string name="favorites_count">Favoriten (%1$d)</string>
+    <string name="clear_favorites">Favoriten löschen</string>
 </resources>

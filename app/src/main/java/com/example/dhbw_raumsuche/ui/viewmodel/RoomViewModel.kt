@@ -43,8 +43,13 @@ class RoomViewModel(
     val sortType: StateFlow<RoomSortType> = _sortType
 
     val roomList: StateFlow<List<RoomWithEvents>> =
-        combine(_rooms, _filterSettings, _sortType) { rooms, filterSettings, sortType ->
-            val filteredRooms = filterRooms(rooms, filterSettings)
+        combine(
+            _rooms,
+            _filterSettings,
+            _sortType,
+            _favorites
+        ) { rooms, filterSettings, sortType, favorites ->
+            val filteredRooms = filterRooms(rooms, filterSettings, favorites)
             when (sortType) {
                 RoomSortType.ROOM_ID -> filteredRooms.sortedBy { it.room.roomId }
                 RoomSortType.BUILDING -> filteredRooms.sortedBy { it.room.building }
@@ -54,7 +59,8 @@ class RoomViewModel(
 
     private fun filterRooms(
         rooms: List<RoomWithEvents>,
-        filterSettings: RoomFilterSettings
+        filterSettings: RoomFilterSettings,
+        favorites: Set<String>
     ): List<RoomWithEvents> {
         return rooms.filter {
             // Location filter overrides the selected buildings
@@ -69,7 +75,7 @@ class RoomViewModel(
                 Building.valueOf(it.building)
             ))
         }.filter { !filterSettings.free || it.isFree }
-            .filter { !filterSettings.favorites || favorites.value.contains(it.room.roomId) }
+            .filter { !filterSettings.favorites || favorites.contains(it.room.roomId) }
     }
 
     init {
@@ -103,6 +109,15 @@ class RoomViewModel(
             }
         }
         _favorites.value = updatedSet
+    }
+
+    fun clearFavorites() {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[FavoritesKeys.FAVORITES] = ""
+            }
+        }
+        _favorites.value = emptySet()
     }
 
     fun setSortType(sortType: RoomSortType) {
