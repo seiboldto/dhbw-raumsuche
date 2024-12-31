@@ -23,7 +23,7 @@ abstract class RoomsDatabase: RoomDatabase() {
         @Volatile
         private var INSTANCE: RoomsDatabase? = null
 
-        // Singelton Pattern to only ever have one Instance of the Database
+        // Singleton Pattern to only ever have one Instance of the Database
         fun getInstance(context: Context): RoomsDatabase {
             return INSTANCE ?: synchronized(this) {
                 createDatabase(context).also { INSTANCE = it }

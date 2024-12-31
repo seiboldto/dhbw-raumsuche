@@ -26,7 +26,7 @@ const val FAVORITES_DELIMITER = "|"
 class RoomViewModel(
     private val dataStore: DataStore<Preferences>,
     private val roomDao: RoomDao,
-    private val writeLatestRoomDataInDB: suspend () -> Unit,
+    private val writeLatestRoomDataToDB: suspend () -> Unit,
 ) : ViewModel() {
     // Directly collect the flow of rooms with events from the DAO
     private val _rooms = MutableStateFlow<List<RoomWithEvents>>(emptyList())
@@ -38,7 +38,7 @@ class RoomViewModel(
     private val _filterSettings = MutableStateFlow(RoomFilterSettings())
     val filterSettings: StateFlow<RoomFilterSettings> = _filterSettings
 
-    private val _sortType = MutableStateFlow(RoomSortType.FREETIME)
+    private val _sortType = MutableStateFlow(RoomSortType.FREE_TIME)
     val sortType: StateFlow<RoomSortType> = _sortType
 
     val roomList: StateFlow<List<RoomWithEvents>> =
@@ -53,7 +53,7 @@ class RoomViewModel(
                 RoomSortType.ROOM_ID -> filteredRooms.sortedBy { it.room.roomId }
                 RoomSortType.BUILDING -> filteredRooms.sortedBy { it.room.building }
                 RoomSortType.FLOOR -> filteredRooms.sortedBy { it.room.floor }
-                RoomSortType.FREETIME -> filteredRooms.sortedByDescending{ if(it.isFree) it.freeTime else 0}
+                RoomSortType.FREE_TIME -> filteredRooms.sortedByDescending{ if(it.isFree) it.freeTime else 0}
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -80,7 +80,7 @@ class RoomViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            writeLatestRoomDataInDB()
+            writeLatestRoomDataToDB()
         }
         viewModelScope.launch {
             roomDao.getRoomsWithEvents()

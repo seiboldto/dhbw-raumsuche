@@ -1,6 +1,7 @@
 package com.example.dhbw_raumsuche.data.local
 
 import android.content.Context
+import android.util.Log
 import com.example.dhbw_raumsuche.data.local.dao.EventDao
 import com.example.dhbw_raumsuche.data.local.entity.EventEntity
 import com.example.dhbw_raumsuche.data.local.entity.RoomEntity
@@ -40,6 +41,7 @@ class RoomPersistenceService(private val context: Context) {
         val rooms = roomEntities.await()
         val events = eventEntities.await()
 
+        Log.d("RoomPersistenceService", "start writing rooms to the DB")
         addRoomsToDatabase(rooms.toList())
         eventDao.insertEvents(events.toList())
     }

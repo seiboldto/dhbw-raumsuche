@@ -175,7 +175,7 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
                                         RoomSortType.ROOM_ID -> R.string.room_id
                                         RoomSortType.FLOOR -> R.string.floor
                                         RoomSortType.BUILDING -> R.string.building
-                                        RoomSortType.FREETIME -> R.string.free_time
+                                        RoomSortType.FREE_TIME -> R.string.free_time
                                     }
                                 )
                             )
