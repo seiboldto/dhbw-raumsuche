@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     return RoomViewModel(
                         applicationContext.favoritesStore,
                         db.roomDao()
-                    ) { writeLatestRoomDataInDB() } as T
+                    ) { writeLatestRoomDataToDB() } as T
                 }
             }
         }
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun writeLatestRoomDataInDB() {
+    private suspend fun writeLatestRoomDataToDB() {
         settingsViewModel.setIsLoading(true)
         try {
             val roomData = getRoomData(this@MainActivity)

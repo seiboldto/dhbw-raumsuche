@@ -13,6 +13,7 @@ import java.time.ZoneId
 class RoomDataProvider {
 
     companion object {
+        private const val LOGGING_TAG = "RoomDataProvider"
         private const val ROOM_JSON_FILENAME = "room.json"
 
         suspend fun getRoomData(context: Context): RoomJson {
@@ -20,6 +21,7 @@ class RoomDataProvider {
 
             val localData = readLocalRoomData(file)
             if (localData != null && isLatestJson(localData.updatedAt.toLong() * 1000)) {
+                Log.d(LOGGING_TAG, "Local RoomJson is up to date")
                 return localData
             }
 
@@ -33,7 +35,7 @@ class RoomDataProvider {
                     Json.decodeFromString(jsonString)
                 } catch (e: Exception) {
                     Log.e(
-                        "RoomDataProvider",
+                        LOGGING_TAG,
                         "Error while reading or parsing the local room json file: ${e.message}"
                     )
                     null
@@ -44,16 +46,17 @@ class RoomDataProvider {
         }
 
         private suspend fun downloadAndSaveRoomData(file: File): RoomJson {
+            Log.d(LOGGING_TAG, "start downloading the latest RoomJson")
             val latestRoomJsonString = downloadRoomData()
+            Log.d(LOGGING_TAG, "start writing RoomJson to disk")
             file.writeText(latestRoomJsonString)
             return Json.decodeFromString(latestRoomJsonString)
         }
 
         private fun isLatestJson(timestamp: Long): Boolean {
             val currentDate = LocalDate.now()
-            val dateFromTimestamp = Instant.ofEpochMilli(timestamp)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
+            val dateFromTimestamp =
+                Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
 
             return currentDate == dateFromTimestamp
         }

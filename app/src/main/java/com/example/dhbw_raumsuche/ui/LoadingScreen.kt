@@ -21,7 +21,6 @@ import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
 
-
 @Composable
 fun LoadingScreen(
     roomViewModel: RoomViewModel,
