@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">DHBW Raumsuche</string>
-    <string name="location_permission_error">Um das nächste Gebäude ermitteln zu können, benötigt diese App die Standort-Berechtigung.</string>
     <string name="color_scheme">Farbschema</string>
     <string name="color_scheme_light">Hell</string>
     <string name="color_scheme_dark">Dunkel</string>
@@ -14,4 +13,9 @@
     <string name="floor">Etage</string>
     <string name="occupied">Belegt</string>
     <string name="free">Frei</string>
+    <string name="location">Standort</string>
+    <string name="location_error">Um das nächste Gebäude ermitteln zu können, benötigt diese App die Standort-Berechtigung.</string>
+    <string name="location_description">Gebäude %1$s, Etage %2$s</string>
+    <string name="no_rooms">Keine Räume gefunden.</string>
+    <string name="clear">Löschen</string>
 </resources>

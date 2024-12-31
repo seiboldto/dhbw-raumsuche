@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.dhbw_raumsuche.data.local.dao.RoomDao
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.location.Building
+import com.example.dhbw_raumsuche.location.Floor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +44,15 @@ class RoomViewModel(
         filterSettings: RoomFilterSettings
     ): List<RoomWithEvents> {
         return rooms.filter {
-            (filterSettings.selectedBuildings.isEmpty() || it.building.isNotEmpty() && filterSettings.selectedBuildings.contains(
+            // Location filter overrides the selected buildings
+            if (filterSettings.locationBuilding != null && filterSettings.locationFloor != null) {
+                it.building == filterSettings.locationBuilding.toString() && it.room.floor == when (filterSettings.locationFloor) {
+                    Floor.FirstFloor -> "1"
+                    Floor.SecondFloor -> "2"
+                    Floor.ThirdFloor -> "3"
+                    Floor.FourthFloor -> "4"
+                }
+            } else (filterSettings.selectedBuildings.isEmpty() || it.building.isNotEmpty() && filterSettings.selectedBuildings.contains(
                 Building.valueOf(it.building)
             ))
         }
@@ -75,23 +84,10 @@ class RoomViewModel(
         }
     }
 
-//    fun OnEvent(event: RoomListEvent) {
-//        when (event) {
-//            is RoomListEvent.SortRooms -> {
-//                _sortType.value = event.sortType
-//            }
-//        }
-//    }
-
-    /*
-@OptIn(ExperimentalCoroutinesApi::class)
-private val _rooms = _sortType.flatMapLatest { sortType ->
-    when (sortType) {
-        RoomSortType.ROOM_ID -> roomDao.getRooms()
-        RoomSortType.FLOOR -> roomDao.getRoomsSortByFloor()
-        RoomSortType.BUILDING -> roomDao.getRoomsSortByBuilding()
+    fun setLocationFilter(building: Building?, floor: Floor?) {
+        viewModelScope.launch {
+            _filterSettings.value =
+                _filterSettings.value.copy(locationBuilding = building, locationFloor = floor)
+        }
     }
-}.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
-*/
-
 }

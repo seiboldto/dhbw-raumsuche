@@ -81,23 +81,25 @@ fun MainScreen(
                 )
             },
         ) { innerPadding ->
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-                content = {
-                    RoomFilters(roomViewModel)
-                    HorizontalDivider()
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(roomListState) { roomWithEvents ->
-                            RoomListItem(roomWithEvents)
-                        }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                RoomFilters(roomViewModel)
+                HorizontalDivider()
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(roomListState) { roomWithEvents ->
+                        RoomListItem(roomWithEvents)
                     }
                 }
-            )
+                if (roomListState.isEmpty()) Text(text = stringResource(R.string.no_rooms))
+            }
+
         }
 
 
