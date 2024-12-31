@@ -73,6 +73,7 @@ dependencies {
     implementation (libs.okhttp)
     implementation(libs.jetbrains.kotlinx.serialization.json.v163)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.datastore.core.android)
 
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     implementation(composeBom)
