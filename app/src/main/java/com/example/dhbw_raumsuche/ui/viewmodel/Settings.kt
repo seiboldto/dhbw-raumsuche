@@ -60,7 +60,7 @@ val LocalSettingsModel = compositionLocalOf<SettingsViewModel> {
     error("No SettingsModel provided")
 }
 
-val Context.dataStore by preferencesDataStore(name = "settings")
+val Context.settingsStore by preferencesDataStore(name = "settings")
 
 object SettingsKeys  {
     val THEME = stringPreferencesKey("theme")

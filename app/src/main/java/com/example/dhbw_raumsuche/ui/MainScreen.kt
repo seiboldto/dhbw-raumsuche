@@ -50,7 +50,7 @@ fun MainScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { ModalDrawerSheet { SettingsDrawer() } }) {
+        drawerContent = { ModalDrawerSheet { SettingsDrawer(roomViewModel) } }) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -94,7 +94,7 @@ fun MainScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(roomListState) { roomWithEvents ->
-                        RoomListItem(roomWithEvents)
+                        RoomListItem(roomViewModel, roomWithEvents)
                     }
                 }
                 if (roomListState.isEmpty()) Text(text = stringResource(R.string.no_rooms))
