@@ -38,7 +38,7 @@ class RoomViewModel(
     private val _filterSettings = MutableStateFlow(RoomFilterSettings())
     val filterSettings: StateFlow<RoomFilterSettings> = _filterSettings
 
-    private val _sortType = MutableStateFlow(RoomSortType.ROOM_ID)
+    private val _sortType = MutableStateFlow(RoomSortType.FREETIME)
     val sortType: StateFlow<RoomSortType> = _sortType
 
     val roomList: StateFlow<List<RoomWithEvents>> =
@@ -53,6 +53,7 @@ class RoomViewModel(
                 RoomSortType.ROOM_ID -> filteredRooms.sortedBy { it.room.roomId }
                 RoomSortType.BUILDING -> filteredRooms.sortedBy { it.room.building }
                 RoomSortType.FLOOR -> filteredRooms.sortedBy { it.room.floor }
+                RoomSortType.FREETIME -> filteredRooms.sortedByDescending{ if(it.isFree) it.freeTime else 0}
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
