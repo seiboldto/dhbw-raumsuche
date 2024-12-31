@@ -1,6 +1,7 @@
 package com.example.dhbw_raumsuche.ui.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -82,7 +83,8 @@ class RoomViewModel(
         loadRooms()
         viewModelScope.launch {
             dataStore.data.map { preferences ->
-                preferences[FavoritesKeys.FAVORITES]?.split(FAVORITES_DELIMITER)?.toSet()
+                preferences[FavoritesKeys.FAVORITES]?.split(FAVORITES_DELIMITER)
+                    ?.filter { it.isNotEmpty() }?.toSet()
                     ?: emptySet()
             }.collect { _favorites.value = it }
         }
