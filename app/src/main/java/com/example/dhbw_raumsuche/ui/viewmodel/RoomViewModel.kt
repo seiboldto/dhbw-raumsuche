@@ -13,7 +13,6 @@ import com.example.dhbw_raumsuche.data.local.dao.RoomDao
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.location.Building
 import com.example.dhbw_raumsuche.location.Floor
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +26,7 @@ const val FAVORITES_DELIMITER = "|"
 class RoomViewModel(
     private val dataStore: DataStore<Preferences>,
     private val roomDao: RoomDao,
-    private val getRoomData: () -> Unit,
+    private val writeLatestRoomDataInDB: suspend () -> Unit,
 ) : ViewModel() {
     // Directly collect the flow of rooms with events from the DAO
     private val _rooms = MutableStateFlow<List<RoomWithEvents>>(emptyList())
@@ -79,23 +78,19 @@ class RoomViewModel(
     }
 
     init {
-        loadRooms()
+        viewModelScope.launch(Dispatchers.IO) {
+            writeLatestRoomDataInDB()
+        }
         viewModelScope.launch {
+            roomDao.getRoomsWithEvents()
+                .collect { rooms ->
+                    _rooms.emit(rooms)
+                }
             dataStore.data.map { preferences ->
                 preferences[FavoritesKeys.FAVORITES]?.split(FAVORITES_DELIMITER)
                     ?.filter { it.isNotEmpty() }?.toSet()
                     ?: emptySet()
             }.collect { _favorites.value = it }
-        }
-    }
-
-    private fun loadRooms() {
-        viewModelScope.launch {
-            getRoomData()
-            CoroutineScope(Dispatchers.IO).launch {
-                _rooms.emit(roomDao.getRoomsWithEvents())
-
-            }
         }
     }
 

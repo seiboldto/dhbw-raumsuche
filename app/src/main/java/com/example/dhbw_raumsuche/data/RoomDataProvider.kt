@@ -13,8 +13,10 @@ import java.time.ZoneId
 class RoomDataProvider {
 
     companion object {
+        private const val ROOM_JSON_FILENAME = "room.json"
+
         suspend fun getRoomData(context: Context): RoomJson {
-            val file = File(context.filesDir, "room.json")
+            val file = File(context.filesDir, ROOM_JSON_FILENAME)
 
             val localData = readLocalRoomData(file)
             if (localData != null && isLatestJson(localData.updatedAt.toLong() * 1000)) {

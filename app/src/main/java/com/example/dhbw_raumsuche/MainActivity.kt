@@ -7,14 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import android.Manifest
 import android.widget.Toast
-import com.example.dhbw_raumsuche.data.RoomDataProvider
+import com.example.dhbw_raumsuche.data.RoomDataProvider.Companion.getRoomData
+import com.example.dhbw_raumsuche.data.local.RoomPersistenceService
 import com.example.dhbw_raumsuche.data.local.RoomsDatabase
 import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.location.GPSToLocationService
@@ -28,9 +26,6 @@ import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
 import com.example.dhbw_raumsuche.ui.viewmodel.favoritesStore
 import com.example.dhbw_raumsuche.ui.viewmodel.settingsStore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val db by lazy {
@@ -42,7 +37,10 @@ class MainActivity : ComponentActivity() {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     @Suppress("UNCHECKED_CAST")
-                    return RoomViewModel(applicationContext.favoritesStore, db.roomDao()) { getRoomData() } as T
+                    return RoomViewModel(
+                        applicationContext.favoritesStore,
+                        db.roomDao()
+                    ) { writeLatestRoomDataInDB() } as T
                 }
             }
         }
@@ -100,23 +98,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getRoomData() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                settingsViewModel.setIsLoading(true)
-
-                try {
-                    val roomData =
-                        withContext(Dispatchers.IO) { RoomDataProvider.getRoomData(this@MainActivity) }
-                    settingsViewModel.setIsLoading(false)
-                    val parser = withContext(Dispatchers.Default) { ICalParser(this@MainActivity) }
-                    parser.parseICal(roomData.iCals)
-                } catch (err: Throwable) {
-                    settingsViewModel.setError(err)
-                }
-            }
+    private suspend fun writeLatestRoomDataInDB() {
+        settingsViewModel.setIsLoading(true)
+        try {
+            val roomData = getRoomData(this@MainActivity)
+            settingsViewModel.setIsLoading(false)
+            val persistenceService = RoomPersistenceService(this@MainActivity)
+            persistenceService.updateDbFromICal(ICalParser.parseICal(roomData.iCals))
+        } catch (err: Throwable) {
+            settingsViewModel.setError(err)
+        } finally {
+            settingsViewModel.setIsLoading(false)
         }
     }
 }
-
-

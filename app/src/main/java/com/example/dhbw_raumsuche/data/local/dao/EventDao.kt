@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.dhbw_raumsuche.data.local.entity.EventEntity
-import com.example.dhbw_raumsuche.data.local.entity.RoomEntity
 
 @Dao
 interface EventDao {
@@ -13,10 +12,10 @@ interface EventDao {
     suspend fun insertEvent(event: EventEntity)
 
     @Upsert
-    suspend fun insertEvents(rooms: List<RoomEntity>)
+    suspend fun insertEvents(rooms: List<EventEntity>)
 
     @Delete
-    suspend fun deleteEvent(roomEntity: RoomEntity)
+    suspend fun deleteEvent(roomEntity: EventEntity)
 
     @Query("SELECT * FROM events")
     fun getEvents(): List<EventEntity>
