@@ -10,6 +10,7 @@ playServicesLocationVersion = "21.3.0"
 kotlinVersion = "2.1.0"
 roomRuntimeVersion = "2.6.1"
 symbolProcessingApiVersion = "2.1.0-1.0.29"
+datastoreCoreAndroidVersion = "1.1.1"
 
 [libraries]
 androidx-activity-compose-v192 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -28,6 +29,7 @@ ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocationVersion" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroidVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
