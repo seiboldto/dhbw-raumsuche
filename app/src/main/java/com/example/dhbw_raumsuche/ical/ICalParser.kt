@@ -20,7 +20,7 @@ class ICalParser(private val context: Context) {
     private val db: RoomsDatabase by lazy { RoomsDatabase.getInstance(context) }
     private val eventDao: EventDao by lazy { db.eventDao() }
 
-    suspend fun parseICal(icals: List<String>) {
+    suspend fun parseICal(iCals: List<String>) {
         // Operate ical4j with minify.
         // See https://stackoverflow.com/questions/50733209/ical4j-2-2-0-using-grape-throws-java-lang-noclassdeffounderror-javax-cache-con
         MapTimeZoneCache() // Tell proguard that the class is used
@@ -32,36 +32,36 @@ class ICalParser(private val context: Context) {
         val registry: TimeZoneRegistry = TimeZoneRegistryImpl("zoneinfo-outlook-global/")
         val builder = CalendarBuilder(registry)
 
-        for (ical in icals) {
-            val sin = StringReader(cleanMalformedIcal(ical))
+        for (iCal in iCals) {
+            val sin = StringReader(cleanMalformedICal(iCal))
             val calendar: Calendar = builder.build(sin)
-            updateDbFromIcal(calendar)
+            updateDbFromICal(calendar)
         }
     }
 
-    private fun cleanMalformedIcal(calendarString: String): String {
+    private fun cleanMalformedICal(calendarString: String): String {
         return calendarString.replace("\\n\\s".toRegex(), "")
     }
 
-    private suspend fun updateDbFromIcal(calendar: Calendar) {
+    private suspend fun updateDbFromICal(calendar: Calendar) {
         val events: List<VEvent> = calendar.getComponents(Component.VEVENT)
         val locations: List<Location> =
             events.mapNotNull { event -> event.location }.toSet().toList()
 
         for (location in locations) {
-            val room = icalLocationToRoom(location) ?: continue
+            val room = iCalLocationToRoom(location) ?: continue
             addRoomToDatabase(room)
         }
 
         for (event in events) {
-            val eventEntity = icalEventToEventEntity(event)
+            val eventEntity = iCalEventToEventEntity(event)
             if (eventEntity != null) {
                 eventDao.insertEvent(eventEntity)
             }
         }
     }
 
-    private fun icalEventToEventEntity(event: VEvent): EventEntity? {
+    private fun iCalEventToEventEntity(event: VEvent): EventEntity? {
         val id = event.uid ?: return null
         val start = event.startDate ?: return null
         val end = event.endDate ?: return null
@@ -79,20 +79,31 @@ class ICalParser(private val context: Context) {
     }
 
     private fun getRoomId(location: Location): String? {
-        val idRegex = "(.+?)\\s(.*)".toRegex()
-        val matchIdResult = idRegex.find(location.value)
-        return matchIdResult?.groupValues?.get(1)
+        // The source room names do not follow a specified pattern.
+        // As such, they need to be transformed to [Number][Building].
+
+        // "000A ..." or "000 A ..."
+        val numberBuilding = Regex("^(\\d+|\\d+\\.\\d+) ?([A-D]) .*").find(location.value)
+        // "A000 ..." or "A 000 "
+        val buildingNumber = Regex("^([A-D]) ?(\\d+|\\d+\\.\\d+) .*").find(location.value)
+
+        if (numberBuilding != null) {
+            val (number, building) = numberBuilding.destructured
+            return number + building
+        } else if (buildingNumber != null) {
+            val (building, number) = buildingNumber.destructured
+            return number + building
+        }
+
+        return null
     }
 
-    private fun icalLocationToRoom(location: Location): RoomEntity? {
+    private fun iCalLocationToRoom(location: Location): RoomEntity? {
         val id = getRoomId(location) ?: return null
 
-        // Room IDs are mostly in the form of 000A, where 000 represents the room number and A represents the building.
-        val matchDetailResult: MatchResult? = "([0-9])([0-9][0-9])([A-Z])".toRegex().find(id)
-
-        val building: String = matchDetailResult?.groups?.get(3)?.value ?: ""
-        val floor = matchDetailResult?.groups?.get(1)?.value ?: ""
-        val number = matchDetailResult?.groups?.get(2)?.value ?: ""
+        val building = id[id.length - 1].toString()
+        val number = id.substring(0, id.length - 1)
+        val floor = number[0].toString()
 
         return RoomEntity(
             roomId = id,
