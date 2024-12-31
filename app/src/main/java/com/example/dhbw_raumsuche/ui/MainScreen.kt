@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.ui.rooms.RoomFilters
@@ -93,15 +95,22 @@ fun MainScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(roomListState) { roomWithEvents ->
-                        RoomListItem(roomViewModel, roomWithEvents)
+                    if (roomListState.isEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.no_rooms),
+                                modifier = Modifier.fillMaxWidth(),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        items(roomListState) { roomWithEvents ->
+                            RoomListItem(roomViewModel, roomWithEvents)
+                        }
                     }
                 }
-                if (roomListState.isEmpty()) Text(text = stringResource(R.string.no_rooms))
             }
-
         }
-
-
     }
 }
