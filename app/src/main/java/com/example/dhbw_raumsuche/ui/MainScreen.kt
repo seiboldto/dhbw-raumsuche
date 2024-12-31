@@ -29,7 +29,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.ui.rooms.RoomFilters
 import com.example.dhbw_raumsuche.ui.rooms.RoomListItem
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
@@ -59,7 +61,7 @@ fun MainScreen(
                     ),
                     title = {
                         Text(
-                            "Raumsuche",
+                            stringResource(R.string.app_name)
                         )
                     },
                     actions = {
@@ -72,7 +74,7 @@ fun MainScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
-                                contentDescription = "Einstellungen"
+                                contentDescription = stringResource(R.string.settings)
                             )
                         }
                     },

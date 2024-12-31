@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -69,11 +70,7 @@ class MainActivity : ComponentActivity() {
                 gpsToLocationService, this
             )
         } else {
-            Toast.makeText(
-                this,
-                "This app requires permission to be granted in order to show the nearest building to your location!",
-                Toast.LENGTH_SHORT
-            ).show()
+            // TODO: Handle this case
         }
     }
 

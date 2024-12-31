@@ -15,6 +15,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.location.Building
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomSortType
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
@@ -46,7 +49,13 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
         Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
             InputChip(
                 onClick = { buildingMenuExpanded = true },
-                label = { Text(text = if (filterSettings.selectedBuildings.isNotEmpty()) filterSettings.selectedBuildings.joinToString() else "Gebäude") },
+                label = {
+                    Text(
+                        text = if (filterSettings.selectedBuildings.isNotEmpty()) filterSettings.selectedBuildings.joinToString() else stringResource(
+                            R.string.buildings
+                        )
+                    )
+                },
                 selected = filterSettings.selectedBuildings.isNotEmpty(),
                 leadingIcon = {
                     Icon(
@@ -77,16 +86,31 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
         }
         Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
             IconButton(onClick = { sortMenuExpanded = true }) {
-                Icon(Icons.AutoMirrored.Default.List, contentDescription = null)
+                Icon(
+                    Icons.AutoMirrored.Default.List,
+                    contentDescription = stringResource(R.string.sort)
+                )
             }
             DropdownMenu(
                 expanded = sortMenuExpanded,
                 onDismissRequest = { sortMenuExpanded = false }) {
+                DropdownMenuItem(text = {
+                    Text(
+                        text = stringResource(R.string.sort),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }, onClick = {})
                 RoomSortType.entries.forEach { sortType ->
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = sortType.name
+                                text = stringResource(
+                                    when (sortType) {
+                                        RoomSortType.ROOM_ID -> R.string.room_id
+                                        RoomSortType.FLOOR -> R.string.floor
+                                        RoomSortType.BUILDING -> R.string.building
+                                    }
+                                )
                             )
                         },
                         onClick = {

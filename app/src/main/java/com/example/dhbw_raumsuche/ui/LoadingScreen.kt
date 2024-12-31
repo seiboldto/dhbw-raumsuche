@@ -15,7 +15,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
 
@@ -37,7 +39,7 @@ fun LoadingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(Icons.Default.Warning, contentDescription = null)
-            Text("Ein unerwarteter Fehler ist aufgetreten. Bitte überprüfe die Internetverbindung oder starte die App neu.")
+            Text(text = stringResource(R.string.loading_error))
         }
     } else if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.ui.theme.darkgreen
 
@@ -94,7 +96,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
                     ShowFavStar()
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Drop-down Arrow",
+                        contentDescription = null,
                         modifier = Modifier
                             .rotate(rotationState)
                             .clickable { expandedState = !expandedState },
@@ -119,7 +121,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
                     ShowFavStar()
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Drop-down Arrow",
+                        contentDescription = null,
                         modifier = Modifier
                             .rotate(rotationState)
                             .clickable { expandedState = !expandedState },
@@ -138,7 +140,7 @@ private fun ShowFavStar() {
 
     Icon(
         Icons.Default.Star,
-        contentDescription = "Star",
+        contentDescription = null,
         modifier = Modifier
             .clickable { favorite = !favorite },
         tint = starcolor
@@ -149,13 +151,13 @@ private fun ShowFavStar() {
 private fun ShowRoomStatus(roomWithEvents: RoomWithEvents) {
     if (roomWithEvents.isFree) {
         Text(
-            text = "Frei " + roomWithEvents.getReadableFreeTime(),
+            text = stringResource(R.string.free) + roomWithEvents.getReadableFreeTime(),
             fontSize = 12.sp,
             color = darkgreen
         )
     } else {
         Text(
-            text = "Belegt",
+            text = stringResource(R.string.occupied),
             fontSize = 12.sp,
             color = Color.Red
         )
