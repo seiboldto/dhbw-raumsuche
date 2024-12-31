@@ -53,7 +53,7 @@ class GPSToLocationService : LocationService {
                 }).addOnSuccessListener { location ->
                 if (location != null) {
                     val building = calculateNearestBuildingForLocation(location)
-                    val floor = calculateNearestFloor(context, location, building)
+                    val floor = calculateNearestFloor(location, building)
                     cont.resume(UserLocation(building.building, floor))
                 } else {
                     cont.resumeWithException(Exception("Location could not be retrieved"))
@@ -77,66 +77,22 @@ class GPSToLocationService : LocationService {
     }
 
     private fun calculateNearestFloor(
-        context: Context,
         location: Location,
         building: DHBWBuilding
     ): Floor {
-        return if (isAtTheUniversity(context, location)) {
-            building.floors
-                .minByOrNull { floor ->
-                    abs(location.altitude - floor.value)
-                }?.key ?: Floor.FirstFloor
-        } else {
-            Floor.FirstFloor
-        }
-    }
+        return building.floors
+            .minByOrNull { floor ->
+                abs(location.altitude - floor.value)
+            }?.key ?: Floor.FirstFloor
 
-    private fun isAtTheUniversity(context: Context, location: Location): Boolean {
-        return runBlocking {
-            try {
-                val address = getAddressForLocation(context, location)
-                address?.getAddressLine(0)
-                    ?.contains("Seckenheimer Landstraße|Coblitzallee|Coblitzweg|Hans-Thoma") != null
-            } catch (e: Exception) {
-                Log.e(
-                    "GPSToLocationService",
-                    "An error occurred while fetching the address: ${e.message}",
-                    e
-                )
-                false
-            }
-        }
-    }
-
-    private suspend fun getAddressForLocation(context: Context, location: Location): Address? {
-        return suspendCancellableCoroutine { cont ->
-            val geocoder = Geocoder(context)
-            geocoder.getFromLocation(
-                location.latitude,
-                location.longitude,
-                1,
-                object : Geocoder.GeocodeListener {
-                    override fun onGeocode(addresses: MutableList<Address>) {
-                        cont.resume(addresses.firstOrNull())
-                    }
-
-                    override fun onError(errorMessage: String?) {
-                        super.onError(errorMessage)
-                        cont.resumeWithException(Exception(errorMessage))
-                    }
-                })
-        }
     }
 
     companion object {
-
         fun checkLocationPermission(context: Context): Boolean {
             return ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         }
-
     }
-
 }

@@ -1,25 +1,25 @@
 package com.example.dhbw_raumsuche
 
-import android.Manifest
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import android.Manifest
+import android.widget.Toast
 import com.example.dhbw_raumsuche.data.RoomDataProvider
 import com.example.dhbw_raumsuche.data.local.RoomsDatabase
 import com.example.dhbw_raumsuche.ical.ICalParser
 import com.example.dhbw_raumsuche.location.GPSToLocationService
 import com.example.dhbw_raumsuche.location.GPSToLocationService.Companion.checkLocationPermission
+import com.example.dhbw_raumsuche.location.LocalLocationModel
 import com.example.dhbw_raumsuche.location.LocationViewModel
 import com.example.dhbw_raumsuche.ui.LoadingScreen
 import com.example.dhbw_raumsuche.ui.theme.CustomTheme
@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
-
     private val db by lazy {
         RoomsDatabase.getInstance(this)
     }
@@ -59,7 +58,7 @@ class MainActivity : ComponentActivity() {
         }
     )
 
-    private val locationViewModel = LocationViewModel()
+    private val locationViewModel = LocationViewModel(requestLocation = { requestLocation() })
     private lateinit var gpsToLocationService: GPSToLocationService
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -70,19 +69,31 @@ class MainActivity : ComponentActivity() {
                 gpsToLocationService, this
             )
         } else {
-            // TODO: Handle this case
+            Toast.makeText(this, R.string.location_error, Toast.LENGTH_LONG)
+        }
+    }
+
+    private fun requestLocation() {
+        if (!checkLocationPermission(this)) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            locationViewModel.updateLocation(
+                gpsToLocationService, this
+            )
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        gpsToLocationService = GPSToLocationService(this)
         enableEdgeToEdge()
+        gpsToLocationService = GPSToLocationService(this)
 
         setContent {
             CompositionLocalProvider(LocalSettingsModel provides settingsViewModel) {
-                CustomTheme {
-                   LoadingScreen(roomViewModel, settingsViewModel)
+                CompositionLocalProvider(LocalLocationModel provides locationViewModel) {
+                    CustomTheme {
+                        LoadingScreen(roomViewModel, settingsViewModel)
+                    }
                 }
             }
         }
@@ -105,17 +116,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    private fun updateLocation() {
-        if (!checkLocationPermission(this)) {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            locationViewModel.updateLocation(
-                gpsToLocationService, this
-            )
-        }
-    }
-
 }
 
 

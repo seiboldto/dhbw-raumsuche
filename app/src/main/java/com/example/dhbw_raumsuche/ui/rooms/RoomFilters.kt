@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -27,8 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.location.Building
+import com.example.dhbw_raumsuche.location.Floor
+import com.example.dhbw_raumsuche.location.LocalLocationModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomSortType
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 
@@ -37,15 +41,45 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
     val filterSettings by roomViewModel.filterSettings.collectAsState()
     val selectedSortType by roomViewModel.sortType.collectAsState()
 
+    val location = LocalLocationModel.current
     var sortMenuExpanded by remember { mutableStateOf(false) }
     var buildingMenuExpanded by remember { mutableStateOf(false) }
+
+    val building = when (location.building) {
+        Building.A -> "A"
+        Building.B -> "B"
+        Building.C -> "C"
+        Building.D -> "D"
+        else -> null
+    }
+
+    val floor = when (location.floor) {
+        Floor.FirstFloor -> "1"
+        Floor.SecondFloor -> "2"
+        Floor.ThirdFloor -> "3"
+        Floor.FourthFloor -> "4"
+        else -> null
+    }
 
     Row(
         Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        InputChip(
+            onClick = { location.requestLocation() },
+            selected = floor != null && building != null,
+            label = {
+                Text(
+                    text = if (floor != null && building != null) stringResource(
+                        R.string.location_description, building, floor
+
+                    ) else stringResource(R.string.location)
+                )
+            },
+            leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) })
         Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
             InputChip(
                 onClick = { buildingMenuExpanded = true },

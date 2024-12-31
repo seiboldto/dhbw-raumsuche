@@ -1,17 +1,18 @@
 package com.example.dhbw_raumsuche.location
 
 import android.content.Context
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
-class LocationViewModel : ViewModel() {
-
-    var building by mutableStateOf("")
-    var floor by mutableStateOf("")
+class LocationViewModel(public val requestLocation: () -> Unit) : ViewModel() {
+    var building by mutableStateOf<Building?>(null)
+    var floor by mutableStateOf<Floor?>(null)
 
     fun updateLocation(
         locationService: LocationService,
@@ -19,10 +20,13 @@ class LocationViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             locationService.getLocation(context)?.let {
-                building = it.building.name
-                floor = it.floor.name
+                building = it.building
+                floor = it.floor
             }
         }
     }
+}
 
+val LocalLocationModel = compositionLocalOf<LocationViewModel> {
+    error("No LocationModel provided")
 }
