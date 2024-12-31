@@ -37,7 +37,7 @@ data class RoomWithEvents(
             return !isFree
         }
 
-    val freeTime: Long
+    private val freeTime: Long
         get() {
             val now = Calendar.getInstance().timeInMillis
             val nextEvent = events

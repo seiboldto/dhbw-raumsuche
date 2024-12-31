@@ -23,6 +23,7 @@ class ServerConnector {
                 throw Exception("Failed to download file: ${response.code}")
             }
 
+            // The response is a gzipped json, unzipping it is necessary
             return withContext(IO) {
                 GZIPInputStream(response.body.byteStream()).use { gzipStream ->
                     val reader = InputStreamReader(gzipStream)
@@ -34,6 +35,7 @@ class ServerConnector {
         private fun createRequest(): Request {
             return Request.Builder()
                 .url("http://192.248.187.245/api/v1/dhbw-rooms")
+                // This header is necessary as the server rejects any requests without it to decrease bandwidth from other actors.
                 .addHeader("Accept", "application/dhbw")
                 .build()
         }

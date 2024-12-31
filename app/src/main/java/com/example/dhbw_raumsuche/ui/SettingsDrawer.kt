@@ -13,8 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.Theme
 
@@ -23,26 +25,41 @@ fun SettingsDrawer() {
     val settings = LocalSettingsModel.current
     val selectedTheme = settings.theme.collectAsState()
 
-    Text("DHBW Raumsuche", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+    Text(
+        stringResource(R.string.app_name),
+        modifier = Modifier.padding(16.dp),
+        style = MaterialTheme.typography.titleMedium
+    )
     HorizontalDivider()
-    Column(modifier = Modifier
-        .padding(16.dp)
-        .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Farbschema")
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(text = stringResource(R.string.color_scheme), style = MaterialTheme.typography.labelMedium)
         Theme.entries.forEach { t ->
             Row(
-                modifier = Modifier.fillMaxWidth().selectable(
-                    selected = t == selectedTheme.value,
-                    onClick = {
-                        settings.onThemeChange(t)
-                    },
-                    role = Role.RadioButton
-                )) {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = t == selectedTheme.value,
+                        onClick = {
+                            settings.onThemeChange(t)
+                        },
+                        role = Role.RadioButton
+                    )
+            ) {
                 RadioButton(
                     selected = t == selectedTheme.value,
                     onClick = null
                 )
-                Text(text = t.name, modifier = Modifier.padding(start = 16.dp))
+                Text(
+                    text = stringResource( when (t) {
+                        Theme.Light -> R.string.color_scheme_light
+                        Theme.Dark -> R.string.color_scheme_dark
+                        Theme.System -> R.string.color_scheme_system
+                    }), modifier = Modifier.padding(start = 16.dp)
+                )
             }
         }
     }

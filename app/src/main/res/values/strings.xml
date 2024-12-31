@@ -1,3 +1,17 @@
 <resources>
-    <string name="app_name">dhbw_raumsuche</string>
+    <string name="app_name">DHBW Raumsuche</string>
+    <string name="location_permission_error">Um das nächste Gebäude ermitteln zu können, benötigt diese App die Standort-Berechtigung.</string>
+    <string name="color_scheme">Farbschema</string>
+    <string name="color_scheme_light">Hell</string>
+    <string name="color_scheme_dark">Dunkel</string>
+    <string name="color_scheme_system">System</string>
+    <string name="settings">Einstellungen</string>
+    <string name="loading_error">Ein unerwarteter Fehler ist aufgetreten. Bitte überprüfe die Internetverbindung oder starte die App neu.</string>
+    <string name="buildings">Gebäude</string>
+    <string name="building">Gebäude</string>
+    <string name="sort">Sortieren</string>
+    <string name="room_id">Raumnummer</string>
+    <string name="floor">Etage</string>
+    <string name="occupied">Belegt</string>
+    <string name="free">Frei</string>
 </resources>

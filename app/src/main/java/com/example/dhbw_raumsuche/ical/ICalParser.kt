@@ -16,14 +16,14 @@ import net.fortuna.ical4j.util.MapTimeZoneCache
 import java.io.StringReader
 import java.sql.Date
 
-
 class ICalParser(private val context: Context) {
     private val db: RoomsDatabase by lazy { RoomsDatabase.getInstance(context) }
     private val eventDao: EventDao by lazy { db.eventDao() }
 
     suspend fun parseICal(icals: List<String>) {
-        // operate ical4j with minify. see https://stackoverflow.com/questions/50733209/ical4j-2-2-0-using-grape-throws-java-lang-noclassdeffounderror-javax-cache-con
-        MapTimeZoneCache() // tell proguard that the class is used
+        // Operate ical4j with minify.
+        // See https://stackoverflow.com/questions/50733209/ical4j-2-2-0-using-grape-throws-java-lang-noclassdeffounderror-javax-cache-con
+        MapTimeZoneCache() // Tell proguard that the class is used
         System.setProperty(
             "net.fortuna.ical4j.timezone.cache.impl",
             "net.fortuna.ical4j.util.MapTimeZoneCache"
@@ -87,6 +87,7 @@ class ICalParser(private val context: Context) {
     private fun icalLocationToRoom(location: Location): RoomEntity? {
         val id = getRoomId(location) ?: return null
 
+        // Room IDs are mostly in the form of 000A, where 000 represents the room number and A represents the building.
         val matchDetailResult: MatchResult? = "([0-9])([0-9][0-9])([A-Z])".toRegex().find(id)
 
         val building: String = matchDetailResult?.groups?.get(3)?.value ?: ""
