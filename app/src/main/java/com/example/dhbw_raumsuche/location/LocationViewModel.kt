@@ -7,10 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
-class LocationViewModel(public val requestLocation: () -> Unit) : ViewModel() {
+class LocationViewModel(val requestLocation: () -> Unit) : ViewModel() {
     var building by mutableStateOf<Building?>(null)
     var floor by mutableStateOf<Floor?>(null)
 
@@ -24,6 +23,11 @@ class LocationViewModel(public val requestLocation: () -> Unit) : ViewModel() {
                 floor = it.floor
             }
         }
+    }
+
+    fun clearLocation() {
+        building = null
+        floor = null
     }
 }
 

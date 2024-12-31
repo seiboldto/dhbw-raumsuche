@@ -3,10 +3,7 @@ package com.example.dhbw_raumsuche.location
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
 import android.location.Location
-import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -14,7 +11,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

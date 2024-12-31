@@ -16,4 +16,6 @@
     <string name="location">Standort</string>
     <string name="location_error">Um das nächste Gebäude ermitteln zu können, benötigt diese App die Standort-Berechtigung.</string>
     <string name="location_description">Gebäude %1$s, Etage %2$s</string>
+    <string name="no_rooms">Keine Räume gefunden.</string>
+    <string name="clear">Löschen</string>
 </resources>

@@ -1,9 +1,9 @@
 package com.example.dhbw_raumsuche.ui.viewmodel
 
 import com.example.dhbw_raumsuche.location.Building
+import com.example.dhbw_raumsuche.location.Floor
 
-data class RoomFilterSettings(val selectedBuildings: Set<Building> = setOf()) {
-
+data class RoomFilterSettings(val selectedBuildings: Set<Building> = setOf(), val locationBuilding: Building? = null, val locationFloor: Floor? = null) {
     fun updateBuildings(building: Building): Set<Building> {
         val updatedSet = selectedBuildings.toMutableSet()
         if (updatedSet.contains(building)) {
@@ -13,5 +13,4 @@ data class RoomFilterSettings(val selectedBuildings: Set<Building> = setOf()) {
         }
         return updatedSet
     }
-
 }
