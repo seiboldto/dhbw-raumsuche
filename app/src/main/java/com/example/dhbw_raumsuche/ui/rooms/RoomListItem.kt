@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
-import com.example.dhbw_raumsuche.ui.theme.darkgreen
+import com.example.dhbw_raumsuche.ui.theme.Green90
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import java.time.ZoneId
 import java.util.Date
@@ -88,7 +88,7 @@ fun RoomListItem(roomViewModel: RoomViewModel, roomWithEvents: RoomWithEvents) {
                     Text(
                         text = roomWithEvents.room.fullName,
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer, // Contrast color
+                        color = MaterialTheme.colorScheme.primary, // Contrast color
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -121,7 +121,7 @@ private fun ShowFavStar(roomViewModel: RoomViewModel, roomWithEvents: RoomWithEv
         contentDescription = null,
         modifier = Modifier
             .clickable { roomViewModel.toggleFavorite(roomWithEvents.room.roomId) },
-        tint = if (favorites.value.contains(roomWithEvents.room.roomId)) Color.White else Color.Black
+        tint = if (favorites.value.contains(roomWithEvents.room.roomId)) Color.Yellow else Color.Black
     )
 }
 
@@ -131,7 +131,7 @@ private fun RoomStatus(roomWithEvents: RoomWithEvents) {
         Text(
             text = stringResource(R.string.free) + roomWithEvents.getReadableFreeTime(),
             fontSize = 12.sp,
-            color = darkgreen
+            color = Green90
         )
     } else {
         Text(
