@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -156,7 +155,7 @@ fun Timeline(events: List<EventEntity>, startTime: Int = 0, endTime: Int = 24) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(blockHeight + 2 * labelHeight + labelPadding)
+            .height(blockHeight + 3 * labelHeight + labelPadding)
             .padding(horizontal = 16.dp)
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
@@ -164,8 +163,6 @@ fun Timeline(events: List<EventEntity>, startTime: Int = 0, endTime: Int = 24) {
                 color = backgroundColor,
                 size = Size(size.width, size.height - 2 * labelHeight.toPx() - labelPadding.toPx())
             )
-
-            val usedLabelHeights = mutableListOf<Float>()
 
             events.forEach { event ->
                 val eventStartFraction =
@@ -179,19 +176,18 @@ fun Timeline(events: List<EventEntity>, startTime: Int = 0, endTime: Int = 24) {
                 drawRect(
                     color = occupiedColor,
                     topLeft = Offset(startX, 0f),
-                    size = Size(endX - startX, size.height - 2 * labelHeight.toPx() - labelPadding.toPx())
+                    size = Size(
+                        endX - startX,
+                        size.height - 2 * labelHeight.toPx() - labelPadding.toPx()
+                    )
                 )
 
-                val labelYBase = size.height - labelHeight.toPx() / 2
-                val adjustedLabelY = usedLabelHeights.find { kotlin.math.abs(it - labelYBase) < labelHeight.toPx() }
-                    ?.let { labelYBase - labelHeight.toPx() } ?: labelYBase
-                usedLabelHeights.add(adjustedLabelY)
-
+                val startY = -labelHeight.toPx() / 2
                 drawContext.canvas.nativeCanvas.apply {
                     drawText(
                         event.start.toTimeLabel(),
                         startX,
-                        adjustedLabelY,
+                        startY,
                         android.graphics.Paint().apply {
                             color = labelColor.toArgb()
                             textSize = 28f
@@ -200,15 +196,13 @@ fun Timeline(events: List<EventEntity>, startTime: Int = 0, endTime: Int = 24) {
                     )
                 }
 
-                val adjustedEndLabelY = usedLabelHeights.find { kotlin.math.abs(it - labelYBase) < labelHeight.toPx() }
-                    ?.let { labelYBase - labelHeight.toPx() } ?: labelYBase
-                usedLabelHeights.add(adjustedEndLabelY)
-
+                val endY =
+                    size.height - 2 * labelHeight.toPx() + labelHeight.toPx() / 2
                 drawContext.canvas.nativeCanvas.apply {
                     drawText(
                         event.end.toTimeLabel(),
                         endX,
-                        adjustedEndLabelY,
+                        endY,
                         android.graphics.Paint().apply {
                             color = labelColor.toArgb()
                             textSize = 28f

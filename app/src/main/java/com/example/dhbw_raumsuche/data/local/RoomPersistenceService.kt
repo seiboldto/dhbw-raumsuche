@@ -4,8 +4,9 @@ import android.content.Context
 import com.example.dhbw_raumsuche.data.local.dao.EventDao
 import com.example.dhbw_raumsuche.data.local.entity.EventEntity
 import com.example.dhbw_raumsuche.data.local.entity.RoomEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.Component
 import net.fortuna.ical4j.model.component.VEvent
@@ -17,30 +18,28 @@ class RoomPersistenceService(private val context: Context) {
     private val db: RoomsDatabase by lazy { RoomsDatabase.getInstance(context) }
     private val eventDao: EventDao by lazy { db.eventDao() }
 
-    suspend fun updateDbFromICal(calendars: List<Calendar>, chunkSize: Int = 50) = coroutineScope {
-        val roomProcessing = async {
+    suspend fun updateDbFromICal(calendars: List<Calendar>) = withContext(
+        Dispatchers.IO) {
+        val roomEntities = async {
             calendars
                 .flatMap { it.getComponents<VEvent>(Component.VEVENT) }
                 .mapNotNull { it.location }
                 .mapNotNull { iCalLocationToRoom(it) }
-                .chunked(chunkSize)
-                .forEach { chunk ->
-                    addRoomsToDatabase(chunk)
-                }
+                .toSet()
         }
 
-        val eventProcessing = async {
+        val eventEntities = async {
             calendars
                 .flatMap { it.getComponents<VEvent>(Component.VEVENT) }
                 .mapNotNull { iCalEventToEventEntity(it) }
-                .chunked(chunkSize)
-                .forEach { chunk ->
-                    eventDao.insertEvents(chunk)
-                }
+                .toSet()
         }
 
-        roomProcessing.await()
-        eventProcessing.await()
+        val rooms = roomEntities.await()
+        val events = eventEntities.await()
+
+        addRoomsToDatabase(rooms.toList())
+        eventDao.insertEvents(events.toList())
     }
 
     private fun iCalEventToEventEntity(event: VEvent): EventEntity? {
