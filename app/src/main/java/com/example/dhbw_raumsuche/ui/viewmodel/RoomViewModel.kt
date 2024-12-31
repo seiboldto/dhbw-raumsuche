@@ -1,6 +1,5 @@
 package com.example.dhbw_raumsuche.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,7 +54,7 @@ class RoomViewModel(
             } else (filterSettings.selectedBuildings.isEmpty() || it.building.isNotEmpty() && filterSettings.selectedBuildings.contains(
                 Building.valueOf(it.building)
             ))
-        }
+        }.filter { !filterSettings.free || it.isFree }
     }
 
     init {
@@ -88,6 +87,19 @@ class RoomViewModel(
         viewModelScope.launch {
             _filterSettings.value =
                 _filterSettings.value.copy(locationBuilding = building, locationFloor = floor)
+        }
+    }
+
+    fun setFavoritesFilter(favorites: Boolean) {
+        viewModelScope.launch {
+            _filterSettings.value =
+                _filterSettings.value.copy(favorites = favorites)
+        }
+    }
+
+    fun setFreeFilter(free: Boolean) {
+        viewModelScope.launch {
+            _filterSettings.value = _filterSettings.value.copy(free = free)
         }
     }
 }

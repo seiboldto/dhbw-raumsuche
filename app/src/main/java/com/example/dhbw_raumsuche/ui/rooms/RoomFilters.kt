@@ -2,7 +2,8 @@ package com.example.dhbw_raumsuche.ui.rooms
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -37,6 +40,7 @@ import com.example.dhbw_raumsuche.location.LocalLocationModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomSortType
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RoomFilters(roomViewModel: RoomViewModel) {
     val filterSettings by roomViewModel.filterSettings.collectAsState()
@@ -67,11 +71,10 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
     }
 
     val isLocationActive = floor != null && building != null
-    Row(
+    FlowRow(
         Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         InputChip(
@@ -135,6 +138,18 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
                 }
             }
         }
+        InputChip(
+            selected = filterSettings.favorites,
+            onClick = { roomViewModel.setFavoritesFilter(!filterSettings.favorites) },
+            label = { Text(text = stringResource(R.string.favorites)) },
+            leadingIcon = { Icon(Icons.Default.Star, contentDescription = null) }
+        )
+        InputChip(
+            selected = filterSettings.free,
+            onClick = { roomViewModel.setFreeFilter(!filterSettings.free) },
+            label = { Text(text = stringResource(R.string.free)) },
+            leadingIcon = { Icon(Icons.Default.ThumbUp, contentDescription = null) }
+        )
         Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
             IconButton(onClick = { sortMenuExpanded = true }) {
                 Icon(

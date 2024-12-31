@@ -18,4 +18,5 @@
     <string name="location_description">Gebäude %1$s, Etage %2$s</string>
     <string name="no_rooms">Keine Räume gefunden.</string>
     <string name="clear">Löschen</string>
+    <string name="favorites">Favoriten</string>
 </resources>
