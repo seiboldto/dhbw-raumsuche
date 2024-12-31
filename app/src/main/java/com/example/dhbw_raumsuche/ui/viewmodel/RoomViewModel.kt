@@ -82,7 +82,8 @@ class RoomViewModel(
         loadRooms()
         viewModelScope.launch {
             dataStore.data.map { preferences ->
-                preferences[FavoritesKeys.FAVORITES]?.split(FAVORITES_DELIMITER)?.toSet()
+                preferences[FavoritesKeys.FAVORITES]?.split(FAVORITES_DELIMITER)
+                    ?.filter { it.isNotEmpty() }?.toSet()
                     ?: emptySet()
             }.collect { _favorites.value = it }
         }

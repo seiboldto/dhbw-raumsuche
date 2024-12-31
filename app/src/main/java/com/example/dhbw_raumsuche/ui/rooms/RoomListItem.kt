@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -92,10 +93,11 @@ fun RoomListItem(roomViewModel: RoomViewModel, roomWithEvents: RoomWithEvents) {
                 )
             }
         }
-
-
+        if (expandedState) {
+            HorizontalDivider()
+            RoomDisplay(roomWithEvents)
+        }
     }
-
 }
 
 @Composable
