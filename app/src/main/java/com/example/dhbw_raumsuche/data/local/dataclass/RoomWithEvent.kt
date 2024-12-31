@@ -54,10 +54,10 @@ data class RoomWithEvents(
 
     fun getReadableFreeTime(): String {
         return when {
-            freeTime > 24 * 60 * 60 * 1000 -> "> 24h"
-            freeTime >= 60 * 60 * 1000 -> "${freeTime / (60 * 60 * 1000)}h"
-            freeTime >= 60 * 1000 -> "${freeTime / (60 * 1000)}min"
-            else -> "< 1min"
+            freeTime > 24 * 60 * 60 * 1000 -> " > 24h"
+            freeTime >= 60 * 60 * 1000 -> " ${freeTime / (60 * 60 * 1000)}h"
+            freeTime >= 60 * 1000 -> " ${freeTime / (60 * 1000)}min"
+            else -> " < 1min"
         }
     }
 
