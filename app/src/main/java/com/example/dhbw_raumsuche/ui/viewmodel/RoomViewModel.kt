@@ -1,5 +1,11 @@
 package com.example.dhbw_raumsuche.ui.viewmodel
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,14 +18,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+const val FAVORITES_DELIMITER = "|"
+
 class RoomViewModel(
-    private val roomDao: RoomDao, private val getRoomData: () -> Unit
+    private val dataStore: DataStore<Preferences>,
+    private val roomDao: RoomDao,
+    private val getRoomData: () -> Unit,
 ) : ViewModel() {
     // Directly collect the flow of rooms with events from the DAO
     private val _rooms = MutableStateFlow<List<RoomWithEvents>>(emptyList())
+
+    private val _favorites = MutableStateFlow<Set<String>>(emptySet())
+    val favorites: StateFlow<Set<String>> = _favorites
 
     // State flows for sort types and filters
     private val _filterSettings = MutableStateFlow(RoomFilterSettings())
@@ -55,10 +69,17 @@ class RoomViewModel(
                 Building.valueOf(it.building)
             ))
         }.filter { !filterSettings.free || it.isFree }
+            .filter { !filterSettings.favorites || favorites.value.contains(it.room.roomId) }
     }
 
     init {
         loadRooms()
+        viewModelScope.launch {
+            dataStore.data.map { preferences ->
+                preferences[FavoritesKeys.FAVORITES]?.split(FAVORITES_DELIMITER)?.toSet()
+                    ?: emptySet()
+            }.collect { _favorites.value = it }
+        }
     }
 
     private fun loadRooms() {
@@ -69,6 +90,19 @@ class RoomViewModel(
 
             }
         }
+    }
+
+    fun toggleFavorite(name: String) {
+        val updatedSet = _favorites.value.toMutableSet()
+        if (updatedSet.contains(name)) updatedSet.remove(name)
+        else updatedSet.add(name)
+
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[FavoritesKeys.FAVORITES] = updatedSet.joinToString(FAVORITES_DELIMITER)
+            }
+        }
+        _favorites.value = updatedSet
     }
 
     fun setSortType(sortType: RoomSortType) {
@@ -102,4 +136,10 @@ class RoomViewModel(
             _filterSettings.value = _filterSettings.value.copy(free = free)
         }
     }
+}
+
+val Context.favoritesStore by preferencesDataStore(name = "favorites")
+
+object FavoritesKeys {
+    val FAVORITES = stringPreferencesKey("favorites")
 }

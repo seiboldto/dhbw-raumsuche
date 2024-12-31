@@ -26,7 +26,8 @@ import com.example.dhbw_raumsuche.ui.theme.CustomTheme
 import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 import com.example.dhbw_raumsuche.ui.viewmodel.SettingsViewModel
-import com.example.dhbw_raumsuche.ui.viewmodel.dataStore
+import com.example.dhbw_raumsuche.ui.viewmodel.favoritesStore
+import com.example.dhbw_raumsuche.ui.viewmodel.settingsStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     @Suppress("UNCHECKED_CAST")
-                    return RoomViewModel(db.roomDao()) { getRoomData() } as T
+                    return RoomViewModel(applicationContext.favoritesStore, db.roomDao()) { getRoomData() } as T
                 }
             }
         }
@@ -52,7 +53,7 @@ class MainActivity : ComponentActivity() {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     @Suppress("UNCHECKED_CAST")
-                    return SettingsViewModel(applicationContext.dataStore) as T
+                    return SettingsViewModel(applicationContext.settingsStore) as T
                 }
             }
         }

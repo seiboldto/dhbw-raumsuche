@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,16 +34,17 @@ import androidx.compose.ui.unit.sp
 import com.example.dhbw_raumsuche.R
 import com.example.dhbw_raumsuche.data.local.dataclass.RoomWithEvents
 import com.example.dhbw_raumsuche.ui.theme.darkgreen
+import com.example.dhbw_raumsuche.ui.viewmodel.RoomViewModel
 
 
 @Composable
-fun RoomListItem(roomWithEvents: RoomWithEvents) {
+fun RoomListItem(roomViewModel: RoomViewModel, roomWithEvents: RoomWithEvents) {
     //Managing expanded State for Cardexpansion
     var expandedState by remember { mutableStateOf(false) }
 
     //Animating the Arrow rotation
     val rotationState by animateFloatAsState(
-        targetValue = if (expandedState) 180f else 0f
+        targetValue = if (expandedState) 180f else 0f, label = ""
     )
 
     // Material3 Card for a block item
@@ -64,7 +66,9 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
         }
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.fillMaxWidth(.80f)) {
@@ -78,7 +82,7 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
                 RoomStatus(roomWithEvents)
             }
             Row {
-                ShowFavStar()
+                ShowFavStar(roomViewModel, roomWithEvents)
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
@@ -95,17 +99,15 @@ fun RoomListItem(roomWithEvents: RoomWithEvents) {
 }
 
 @Composable
-private fun ShowFavStar() {
-    //favorite
-    var favorite by remember { mutableStateOf(false) }
-    val starcolor = if (favorite) Color.Yellow else Color.Black    //starcolor when favored
+private fun ShowFavStar(roomViewModel: RoomViewModel, roomWithEvents: RoomWithEvents) {
+    val favorites = roomViewModel.favorites.collectAsState()
 
     Icon(
         Icons.Default.Star,
         contentDescription = null,
         modifier = Modifier
-            .clickable { favorite = !favorite },
-        tint = starcolor
+            .clickable { roomViewModel.toggleFavorite(roomWithEvents.room.roomId) },
+       tint = if (favorites.value.contains(roomWithEvents.room.roomId)) Color.White else Color.Black
     )
 }
 
