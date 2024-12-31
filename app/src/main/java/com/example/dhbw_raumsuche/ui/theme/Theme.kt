@@ -10,15 +10,13 @@ import com.example.dhbw_raumsuche.ui.viewmodel.LocalSettingsModel
 import com.example.dhbw_raumsuche.ui.viewmodel.Theme
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = White40,
+    primaryContainer = Blue40,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = DarkBlue80,
+    primaryContainer = LightBlue80,
 )
 
 @Composable

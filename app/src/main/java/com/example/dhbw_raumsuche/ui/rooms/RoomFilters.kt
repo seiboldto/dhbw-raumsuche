@@ -144,13 +144,20 @@ fun RoomFilters(roomViewModel: RoomViewModel) {
             label = { Text(text = stringResource(R.string.favorites)) },
             leadingIcon = { Icon(Icons.Default.Star, contentDescription = null) }
         )
+    }
+        FlowRow(
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
         InputChip(
             selected = filterSettings.free,
             onClick = { roomViewModel.setFreeFilter(!filterSettings.free) },
             label = { Text(text = stringResource(R.string.free)) },
             leadingIcon = { Icon(Icons.Default.ThumbUp, contentDescription = null) }
         )
-        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+        Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
             IconButton(onClick = { sortMenuExpanded = true }) {
                 Icon(
                     Icons.AutoMirrored.Default.List,
